@@ -4,17 +4,39 @@ format: html
 editor: visual
 ---
 
+```{bash}
+  git config --global user.email "lizxboggs@gmail.com"
+  git config --global user.name "lizboggs"
+  
+```
+
 Downloading BLAST and use it to compare unknown sequences.
 
 ```{bash}
 
 cd /home/jovyan/applications
-curl -O https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/ncbi-blast-2.16.0+-aarch64-linux.tar.gz
-tar -xf ncbi-blast-2.16.0+-aarch64-linux.tar.gz
+curl -O https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/ncbi-blast-2.16.0+-x64-linux.tar.gz
+tar -xf ncbi-blast-2.16.0+-x64-linux.tar.gz
 
 ```
 
-``` {bash}
+Checking if that download worked:
+
+```{bash}
 /home/jovyan/applications/ncbi-blast-2.16.0+/bin/blastx -h
+
+```
+
+Downloading a file of known sequences:
+
+``` {bash}
+cd ../../blastdb
+curl -O https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_sprot.fasta.gz
+
+mv uniprot_sprot.fasta.gz uniprot_sprot_r2025_01.fasta.gz
+
+gunzip -k uniprot_sprot_r2025_01.fasta.gz
+
+ls
 
 ```
