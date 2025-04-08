@@ -1,0 +1,26 @@
+---
+title: "week02-questions"
+output: html_document
+date: "2025-04-08"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Week 02 Question Set
+
+a)  **What do you feel was the most impressive thing you did in class last week was?**\
+    Probably having to debug code that wasn't mine - there were several steps along the way in the BLAST tutorial that returned an error I hadn't seen before, such as a "broken pipe" error, so utilizing help functions in R and Stack Overflow posts to fix things was a helpful way to refresh my ability to problem-solve coding issues. Sometimes, though, it was a simple issue like needing to correct a software version! Easy to ignore a pesky 2023 vs 2025...
+
+b)  **What is your weekly goal for making progress on your project? What is the next step?**\
+    My project's data is still huge and not yet processed, so I'm going to take files I have that *are* processed already and make plans with those. I need to check what format they're currently in and what format they need to be changed to (using something like PGDSpider) for what I want to do with them, such as run a PCA plot,and get that squared away.
+
+c)  **There were two readings this week not from the textbook, meant for two different audiences. Which reading did you get the most out of and why? Do you have any questions regarding the Journal of Shellfish Research paper?**\
+    I got the most out of the textbook reading, though I did enjoy peering into the functional genomics realm!! My work is solidly in both the vertebrate (fish) and gDNA worlds, so there is some overlap in the general way things are processed between those fields, but they obviously diverge heavily in the actual programs and software used to analyze the resulting data and what we look for in those results. I am a big fan of O'Reilly books for expanding my computer-related skills and knowledge since they're written in such a clear way, so this week's reading helped me better understand what's going on under the hood of some processes and commands I've been using for a while, yet only knew a basic level of what they're doing. I always see "MD5 checksum" while getting packages in R and always wondered what it meant, so this reading also sent me on a little rabbithole of hash functions :) I'm huge on understanding *exactly* what and why things work with code - it helps it stick in my head a lot better than if I'm just copying & pasting without that knowledge. Plus, it helps when it comes time to debug, which is virtually every time I sit down to code!
+
+d)  **What is your favorite thing about markdown and why?**\
+    I really like being able to have much more discrete control over the visual aspect of my text docs, since having to use word processors (i.e. MS Word) can be an actual nightmare when things don't work the way I want!! It's also really nice to have the ability to put code chunks into the document and have them both look clean and be copyable. I don't often employ the latter myself, as I'm either writing something without code or making scripts for my work, but it's so ubiquitous in coding tutorials - I can't imagine having to create those while having the code in messy plain text!
+
+e)  **What is the differnce between `curl` and `wget`? When would you used one over the other?**\
+    The biggest difference is that `curl` is good for file transfer using more protocol options than `wget`, making it a bit more flexible in its abilities, whereas `wget` is good for downloading files from the internet in a less interactive manner. However, the text pointed out that `wget` can recursively download, which I did not even think about! I have primarily used `wget` commands that already had levels laid out for me, so I didn't consider it could go on a downloading spree if left unchecked. So with that said, I would use `wget` for basic downloads like files on an HTTP protocol (i.e. I got a link to my sequencing data and want to put it on my HPC directory) or anything recursive, and `curl` for more complex actions, like using `scp` (a protocol not supported in `wget` but I use quite often) or in writing scripts and automated tasks.
