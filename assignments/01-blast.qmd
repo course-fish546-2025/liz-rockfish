@@ -40,3 +40,86 @@ gunzip -k uniprot_sprot_r2025_01.fasta.gz
 ls
 
 ```
+Make the BLAST database:
+
+``` {bash}
+
+/home/jovyan/applications/ncbi-blast-2.16.0+/bin/makeblastdb \
+-in ../../blastdb/uniprot_sprot_r2025_01.fasta \
+-dbtype prot \
+-out ../../blastdb/uniprot_sprot_r2025_01
+
+```
+Get the query sequence:
+
+```{bash}
+curl https://eagle.fish.washington.edu/cnidarian/Ab_4denovo_CLC6_a.fa \
+-k \
+> ~/blastdb/Ab_4denovo_CLC6_a.fa
+
+head ~/blastdb/Ab_4denovo_CLC6_a.fa
+echo "How many sequences are there?"
+grep -c ">" ~/blastdb/Ab_4denovo_CLC6_a.fa
+
+```
+Run BLAST
+
+``` {bash}
+
+~/applications/ncbi-blast-2.16.0+/bin/blastx \
+-query ~/blastdb/Ab_4denovo_CLC6_a.fa \
+-db ~/blastdb/uniprot_sprot_r2025_01 \
+-out ~/output/Ab_4-uniprot_blastx.tab \
+-evalue 1E-20 \
+-num_threads 16 \
+-max_target_seqs 1 \
+-outfmt 6
+
+head -2 ~/output/Ab_4-uniprot_blastx.tab
+wc -l ~/output/Ab_4-uniprot_blastx.tab
+
+```
+
+Getting annotation table from UniProtKB
+
+``` {bash}
+curl -O -H "Accept: text/plain; format=tsv" "https://rest.uniprot.org/uniprotkb/search?query=reviewed:true+AND+organism_id:9606"
+
+```
+``` {bash}
+curl -O -H "Accept: text/plain; format=tsv" "https://rest.uniprot.org/uniprotkb/stream?compressed=true&fields=accession%2Creviewed%2Cid%2Cprotein_name%2Cgene_names%2Corganism_name%2Clength&format=tsv&query=%28*%29+AND+%28reviewed%3Atrue%29"
+
+```
+Joining BLAST table with annotation table
+
+```{bash}
+head -2 ~/output/Ab_4-uniprot_blastx.tab
+wc -l ~/output/Ab_4-uniprot_blastx.tab
+```
+
+```{bash}
+head -2 ~/output/Ab_4-uniprot_blastx.tab | tr '|' '\t'
+
+```
+
+```{bash}
+tr '|' '\t' < ~/output/Ab_4-uniprot_blastx.tab \
+> ~/output/Ab_4-uniprot_blastx_sep.tab
+```
+
+library(tidyverse)
+
+install.packages("kableExtra")
+library("kableExtra")
+
+bltabl <- read.csv("~/output/Ab_4-uniprot_blastx_sep.tab", sep = '\t', header = FALSE)
+
+kbl(
+head(
+  left_join(bltabl, spgo,  by = c("V3" = "Entry")) %>%
+  select(V1, V3, V13, Protein.names, Organism, Gene.Ontology..biological.process., Gene.Ontology.IDs) %>% mutate(V1 = str_replace_all(V1, 
+            pattern = "solid0078_20110412_FRAG_BC_WHITE_WHITE_F3_QV_SE_trimmed", replacement = "Ab"))
+)
+) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+
