@@ -169,4 +169,4 @@ Writing DEG table to directory
 write.table(tmp.sig, "~/diffge/DEGlist.tab", row.names = T)
 ```
 
-## fixed git config issue (commit from wrong github account)
+(UPDATE AFTER INITIAL COMMIT: fixed git config issue, wrong github account)
