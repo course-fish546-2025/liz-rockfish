@@ -1,0 +1,172 @@
+---
+title: "02-diffge"
+format: html
+editor: visual
+---
+
+***Week 2 Assignment - Differential Gene Expression***
+
+**Part 1: `kallisto`**
+
+Downloading reference
+
+```{bash}
+
+cd ~/diffge
+curl --insecure -O https://gannet.fish.washington.edu/seashell/bu-github/nb-2023/Cgigas/data/rna.fna
+```
+
+Index `rna.fna` file while renaming it
+
+```{bash}
+/home/shared/kallisto/kallisto \
+index -i \
+~/diffge/cgigas_roslin_rna.index \
+~/diffge/rna.fna
+```
+
+Downloading sequence reads
+
+```{bash}
+cd ~/diffge 
+wget --recursive --no-parent --no-directories \
+--no-check-certificate \
+--accept '*.fastq.gz' \
+https://gannet.fish.washington.edu/seashell/bu-github/nb-2023/Cgigas/data/nopp/
+```
+
+Creating sub-directory and running `kallisto`
+
+```{bash}
+mkdir ~/diffge/kallisto_01
+
+find ~/diffge/*fastq.gz \
+| xargs basename -s _L001_R1_001.fastq.gz | xargs -I{} /home/shared/kallisto/kallisto \
+quant -i ~/diffge/cgigas_roslin_rna.index \
+-o ~/diffge/kallisto_01/{} \
+-t 40 \
+--single -l 100 -s 10 ~/diffge/{}_L001_R1_001.fastq.gz
+```
+
+Creating gene expression matrix from `kallisto` output files
+
+```{bash}
+perl /home/shared/trinityrnaseq-v2.12.0/util/abundance_estimates_to_matrix.pl \
+--est_method kallisto \
+    --gene_trans_map none \
+    --out_prefix ~/diffge/kallisto_01 \
+    --name_sample_by_basedir \
+    ~/diffge/kallisto_01/D54_S145/abundance.tsv \
+    ~/diffge/kallisto_01/D56_S136/abundance.tsv \
+    ~/diffge/kallisto_01/D58_S144/abundance.tsv \
+    ~/diffge/kallisto_01/M45_S140/abundance.tsv \
+    ~/diffge/kallisto_01/M48_S137/abundance.tsv \
+    ~/diffge/kallisto_01/M89_S138/abundance.tsv \
+    ~/diffge/kallisto_01/D55_S146/abundance.tsv \
+    ~/diffge/kallisto_01/D57_S143/abundance.tsv \
+    ~/diffge/kallisto_01/D59_S142/abundance.tsv \
+    ~/diffge/kallisto_01/M46_S141/abundance.tsv \
+    ~/diffge/kallisto_01/M49_S139/abundance.tsv \
+    ~/diffge/kallisto_01/M90_S147/abundance.tsv \
+    ~/diffge/kallisto_01/N48_S194/abundance.tsv \
+    ~/diffge/kallisto_01/N50_S187/abundance.tsv \
+    ~/diffge/kallisto_01/N52_S184/abundance.tsv \
+    ~/diffge/kallisto_01/N54_S193/abundance.tsv \
+    ~/diffge/kallisto_01/N56_S192/abundance.tsv \
+    ~/diffge/kallisto_01/N58_S195/abundance.tsv \
+    ~/diffge/kallisto_01/N49_S185/abundance.tsv \
+    ~/diffge/kallisto_01/N51_S186/abundance.tsv \
+    ~/diffge/kallisto_01/N53_S188/abundance.tsv \
+    ~/diffge/kallisto_01/N55_S190/abundance.tsv \
+    ~/diffge/kallisto_01/N57_S191/abundance.tsv \
+    ~/diffge/kallisto_01/N59_S189/abundance.tsv
+```
+
+**Part 2: `DESeq2`**
+
+Install packages
+
+```{r}
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+BiocManager::install("DESeq2")
+```
+
+```{r}
+install.packages("pheatmap")
+install.packages("RColorBrewer")
+install.packages("data.table")
+```
+
+Load R packages
+
+```{r}
+library(DESeq2)
+library(tidyverse)
+library(pheatmap)
+library(RColorBrewer)
+library(data.table)
+```
+
+Read in count matrix
+
+```{r}
+countmatrix <- read.delim("~/diffge/kallisto_01.isoform.counts.matrix", header = TRUE, sep = '\t')
+rownames(countmatrix) <- countmatrix$X
+countmatrix <- countmatrix[,-1]
+head(countmatrix)
+```
+
+Round up integers to whole numbers
+
+```{r}
+countmatrix <- round(countmatrix, 0)
+str(countmatrix)
+```
+
+Get DEGs based on Desication
+
+```{r}
+deseq2.colData <- data.frame(condition=factor(c(rep("control", 12), rep("desicated", 12))), 
+                             type=factor(rep("single-read", 24)))
+rownames(deseq2.colData) <- colnames(data)
+deseq2.dds <- DESeqDataSetFromMatrix(countData = countmatrix,
+                                     colData = deseq2.colData, 
+                                     design = ~ condition)
+```
+
+```{r}
+deseq2.dds <- DESeq(deseq2.dds)
+deseq2.res <- results(deseq2.dds)
+deseq2.res <- deseq2.res[order(rownames(deseq2.res)), ]
+
+head(deseq2.res)
+
+# Count number of hits with adjusted p-value less then 0.05
+dim(deseq2.res[!is.na(deseq2.res$padj) & deseq2.res$padj <= 0.05, ])
+```
+
+Plotting time! Makes a volcano plot
+
+```{r}
+tmp <- deseq2.res
+# The main plot
+plot(tmp$baseMean, tmp$log2FoldChange, pch=20, cex=0.45, ylim=c(-3, 3), log="x", col="darkgray",
+     main="DEG Dessication  (pval <= 0.05)",
+     xlab="mean of normalized counts",
+     ylab="Log2 Fold Change")
+# Getting the significant points and plotting them again so they're a different color
+tmp.sig <- deseq2.res[!is.na(deseq2.res$padj) & deseq2.res$padj <= 0.05, ]
+points(tmp.sig$baseMean, tmp.sig$log2FoldChange, pch=20, cex=0.45, col="red")
+# 2 FC lines
+abline(h=c(-1,1), col="blue")
+```
+
+Writing DEG table to directory
+
+```{r}
+write.table(tmp.sig, "~/diffge/DEGlist.tab", row.names = T)
+```
+
+## fixed git config issue (commit from wrong github account)
