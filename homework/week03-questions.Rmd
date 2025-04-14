@@ -4,6 +4,12 @@ output: html_document
 date: "2025-04-14"
 ---
 
+```{bash}
+git config --global user.email "lizxboggs@gmail.com"
+git config --global user.name "lizboggs"
+
+```
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
