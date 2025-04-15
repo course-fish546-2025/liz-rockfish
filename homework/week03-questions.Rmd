@@ -1,0 +1,43 @@
+---
+title: "week03-questions"
+output: html_document
+date: "2025-04-14"
+---
+
+```{bash}
+git config --global user.email "lizxboggs@gmail.com"
+git config --global user.name "lizboggs"
+
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+a.  **An R Markdown file is plain text file that contains what 3 important types of content?**\
+
+R Markdown contains 1) an optional YAML header (yet another markup language!) surrounded by `---`, as seen in the header of this very document, 2) R code chunks (designated by ```` {```} ````), and 3) text with formatting like *italics.*
+
+b.  **What is a chunk and how do you add them? of the many chunk options which one do you think you will use the most and why? How is inline code different than code chunks?**\
+
+A code chunk is a section of a document that contains code that is able to run; you add a chunk by either adding delimiters ```` {```} ```` and the language in braces at the top delimiter. For example:
+
+```{r}
+
+print("Check out this code chunk!")
+
+```
+
+You can also add them with the keyboard shortcut pointed out in the reading (Ctrl+Alt+I), or with the GUI "Insert" button. As for chunk options, I usually like to see everything outputted; if I'm making a markdown doc with some especially verbose outputs that aren't necessary or have a lot of setup code, however, I would probably gravitate toward options that don't output those results, like `include = FALSE` or even just `echo = FALSE`. The biggest difference in use cases for inline code vs. chunks is that you typically would only use inline for simpler things and operations that you want directly in the text, while chunks can be a lot longer and more complex in their outputs.
+
+c.  **What’s gone wrong with this code? Why are the points not blue?**\
+
+```         
+ggplot(data = mpg) +    geom_point(mapping = aes(x = displ, y = hwy, color = "blue"))
+```
+
+The reason the points aren't blue is because they're included in the `aes()` function, which is treating them like a category to plot, essentially. So then it creates one category for all the points - `blue` - and assigns it a default color, in this case red. So to fix it I believe you could just move the `color = blue` outside of the `aes()` function but within the `geom_point()` function and it should actually color the points blue.
+
+d.  **Of the many things we have done in class the past two weeks, what is one aspect you would like to revisit and spend more time on?**\
+
+I think I'd like to revisit one piece I don't have much prior experience with but was featured in the BLAST exercise, which is HTML tables (specifically we used the `kableExtra` package). Tiny aspect of that assignment but I knew less about what was going on with the code than anything else, as I don't really touch HTML in my other work or daily life!
