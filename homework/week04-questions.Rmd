@@ -1,0 +1,21 @@
+---
+title: "week04-questions"
+output: html_document
+date: "2025-04-21"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+**a. What is tmux and how does this relate to our current way of working on raven?**\
+Tmux is terminal multiplexing, which involves running multiple windows (and, thus, multiple processes) within a single session. I actually didn't know about this, so I'm excited to try it out! I can see it being very handy for working on raven in this class - each week we have three main things to get done (this question set, project progress, and the weekly assignment), so using Tmux to simultaneously run code/scripts for my project work while running code for my weekly assignment as well is a game changer.
+
+**b. What is ssh and what would the code be you would type if you were going to ssh into raven?**\
+`ssh` is a secure shell - a network protocol that is used to connect remotely to another machine. For me, I connect to raven via ssh by typing the command `ssh lizboggs@raven.fish.washington.edu`.
+
+**c. What has been the most challenging part of your research project? Are you happy with your organization skills? If not what could be improved?**\
+I'm currently not super thrilled with my organization since I switched gears recently to using my own data instead of already-processed data, so I need to shift things around and dump files in that aren't already there! My biggest issue currently is scripting. I am currently using Hyak for my HPC computing in my MS research, and there's a lot of ways your script can fail when running it as a batch job. So I've been having to iteratively fix bugs with my STACKS scripts, and while STACKS has a great and helpful manual, it can only go so far when it comes to file-specific issues! But hey, debugging is part of the process.
+
+**d. For last weeks assignment what did you appreciate the most about knitting documents?**\
+I don't really touch html or knitting (like, ever, though I should), so playing around with it was fun since it produces a tangible page to look at that looks much more appealing than source code! I'm very used to working in the terminal and the more utility side of coding, so getting more experience with the "front-end" or aesthetic aspects is always welcome. Though it still confuses me a bit...
