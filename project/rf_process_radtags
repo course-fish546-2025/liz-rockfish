@@ -1,0 +1,46 @@
+#!/bin/bash
+#SBATCH --job-name=process_radtags_rfnewbarcodetry1
+#SBATCH --account=merlab
+#SBATCH --partition=cpu-g2
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=40
+#SBATCH --time=2-16:00:00
+#SBATCH --mem=400G
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=lizboggs@uw.edu
+
+### This is my script for running STACKS2 process_radtags on my rockfish data. It takes approximately 10-12 hours to run with the allotted memory. ###
+
+##### ENVIRONMENT SETUP ##########
+module purge
+source /gscratch/merlab/software/miniconda3/etc/profile.d/conda.sh
+conda activate stacks_env
+
+# Set paths
+RAWDIR=/mmfs1/gscratch/merlab/lizboggs/radseq_data
+OUTDIR=/mmfs1/gscratch/scrubbed/lizboggs/newbarcode_demux
+BARCODE_DIR=/mmfs1/gscratch/merlab/lizboggs/barcodes
+
+process_radtags \
+  -1 ${RAWDIR}/GC3F-LB-10209---8853_S0_L003_R1_001.fastq.gz \
+  -2 ${RAWDIR}/GC3F-LB-10209---8853_S0_L003_R2_001.fastq.gz \
+  -b ${BARCODE_DIR}/allbarcodes_new.txt \
+  -o ${OUTDIR} \
+  --renz_1 sbfI \
+  --inline_index \
+  -i gzfastq \
+  -y fastq \
+  -E phred33 \
+  --bestrad \
+  -q \
+  --filter_illumina \
+  -c \
+  -t 130 \
+  --adapter_1 AGATCGGAAGAGCACACGTCTGAACTCCAGTCA \
+  --adapter_2 AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT \
+  -r \
+  --barcode_dist_1 1 \
+  --barcode_dist_2 1
+
+# Close environment
+conda deactivate
