@@ -1,0 +1,118 @@
+---
+title: "Week 05: Alignment"
+format: html
+editor: visual
+---
+
+Grabbing the BAM/BAI files we need 
+
+```{r, engine='bash'}         
+cd ~/align_assign
+curl -O https://gannet.fish.washington.edu/seashell/bu-mox/scrubbed/120321-cvBS/19F_R1_val_1_bismark_bt2_pe.deduplicated.sorted.bam
+curl -O https://gannet.fish.washington.edu/seashell/bu-mox/scrubbed/120321-cvBS/19F_R1_val_1_bismark_bt2_pe.deduplicated.sorted.bam.bai
+```
+Grabbing the C. virginica genome fasta files
+
+```{r, engine='bash'}         
+cd ~/align_assign
+curl -O https://gannet.fish.washington.edu/seashell/bu-mox/data/Cvirg-genome/GCF_002022765.2_C_virginica-3.0_genomic.fa
+curl -O https://gannet.fish.washington.edu/seashell/bu-mox/data/Cvirg-genome/GCF_002022765.2_C_virginica-3.0_genomic.fa.fai
+```
+### DO IN TERMINAL ###
+/home/shared/samtools-1.12/samtools tview \
+~/align_assign/19F_R1_val_1_bismark_bt2_pe.deduplicated.sorted.bam \
+~/align_assign/GCF_002022765.2_C_virginica-3.0_genomic.fa
+
+Result in terminal can be seen in the `assignments` sub-directory `output`
+
+## Aligning the WGS data and visualizing with IGV
+
+```{r, engine='bash'}
+cd ~/align_assign
+curl -O https://owl.fish.washington.edu/nightingales/C_gigas/F143n08_R2_001.fastq.gz
+curl -O https://owl.fish.washington.edu/nightingales/C_gigas/F143n08_R1_001.fastq.gz
+```
+
+```{r, engine='bash'}
+cd ~/align_assign
+curl -O https://gannet.fish.washington.edu/panopea/Cg-roslin/cgigas_uk_roslin_v1_genomic-mito.fa
+curl -O https://gannet.fish.washington.edu/panopea/Cg-roslin/cgigas_uk_roslin_v1_genomic-mito.fa.fai
+curl -O https://gannet.fish.washington.edu/panopea/Cg-roslin/GCF_902806645.1_cgigas_uk_roslin_v1_genomic-mito.gtf
+```
+
+Alignment time with HISAT2! First we index:
+
+```{r, engine='bash'}
+/home/shared/hisat2-2.2.1/hisat2-build \
+-f ~/align_assign/cgigas_uk_roslin_v1_genomic-mito.fa \
+~/align_assign/cgigas_uk_roslin_v1_genomic-mito.index
+```
+
+Now for running the alignment
+
+```{r, engine='bash'}
+/home/shared/hisat2-2.2.1/hisat2 \
+-x ~/align_assign/cgigas_uk_roslin_v1_genomic-mito.index \
+-p 4 \
+-1 ~/align_assign/F143n08_R1_001.fastq.gz \
+-2 ~/align_assign/F143n08_R2_001.fastq.gz \
+-S ~/align_assign/F143_cgigas.sam
+```
+
+Let's check it out!
+
+```{r, engine='bash'}
+tail -1 ~/align_assign/F143_cgigas.sam
+```
+
+```{r, engine='bash'}
+# Convert SAM to BAM, using 4 additional threads
+/home/shared/samtools-1.12/samtools view -@ 4 -bS \
+~/align_assign/F143_cgigas.sam > ~/align_assign/F143_cgigas.bam
+```
+
+```{r, engine='bash'}
+# Sort the BAM file, using 4 additional threads
+/home/shared/samtools-1.12/samtools sort -@ 4 \
+~/align_assign/F143_cgigas.bam -o ~/align_assign/F143_cgigas_sorted.bam
+
+# Index the sorted BAM file (multi-threading is not applicable to this operation)
+/home/shared/samtools-1.12/samtools index \
+~/align_assign/F143_cgigas_sorted.bam
+```
+`mpileup` time!
+
+```{r, engine='bash'}
+/home/shared/bcftools-1.14/bcftools mpileup --threads 4 --no-BAQ \
+--fasta-ref ~/align_assign/cgigas_uk_roslin_v1_genomic-mito.fa \
+~/align_assign/F143_cgigas_sorted.bam > ~/align_assign/F143_mpileup_output.txt
+```
+Checking out the `mpileup` output
+
+```{r, engine='bash'}
+tail ~/align_assign/F143_mpileup_output.txt
+```
+
+Using `bcftools` to get a VCF
+
+```{r, engine='bash'}
+cat ~/align_assign/F143_mpileup_output.txt \
+| /home/shared/bcftools-1.14/bcftools call -mv -Oz \
+> ~/align_assign/F143_mpile.vcf.gz
+```
+
+Splitting the file up into columns of data based on headers and variant info
+
+```{r, engine='bash'}
+zgrep "^##" -v ~/align_assign/F143_mpile.vcf.gz | \
+awk 'BEGIN{OFS="\t"} {split($8, a, ";"); print $1,$2,$4,$5,$6,a[1],$9,$10}' | head
+
+```
+
+The code below might not work. That is fine. The VCF in the above chunk can be used for visualization in IGV.
+
+```{r, engine='bash'}
+/home/shared/bcftools-1.14/bcftools call \
+-v -c ~/align_assign/F143_mpile.vcf.gz \
+> ~/align_assign/F143_mpile_calls.vcf
+```
