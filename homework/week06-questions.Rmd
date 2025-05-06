@@ -1,0 +1,29 @@
+---
+title: "Week 06 Question Set"
+output: html_document
+date: "2025-05-06"
+---
+
+a)  **What is Quarto?**\
+Quarto is basically a new and improved version of RMarkdown! Which is why I thought it would be funny to continue using RMarkdown for this assignment! But really, it's a document publishing system that allows you to combine text, code, and code outputs into one place and control the visual output (as in, markdown).
+
+b)  **How do you make columns using Revealjs in Quarto Presentations?**\
+For side-by-side columns, you use a div container with class `.columns` containing 2+ containers with class `.column` and a `width` attribute. The example in the readings is as follows:
+
+:::: {.columns}
+
+::: {.column width="40%"}
+Left column
+:::
+
+::: {.column width="60%"}
+Right column
+:::
+
+::::
+
+c)  **How would you change the appearance of slides using Revealjs in Quarto Presentations?**\
+For prettying up the slides, you can use any of the 11 built-in themes (gives you the opportunity to give your presentation a  `blood` theme) or make your own. These are specified in the header. You can also change the appearance of your footer text or add a logo, which is neat!
+
+d)  **What has been the biggest constraint working on your own research project in the past week?**\
+Honestly? Waiting! Processing power, as well. I am ready to move to the next step/job in my pipeline, but the data I currently have has been running for 2 full days now (48hr). Sometimes it just takes a looooong time to run. But I have my next script ready to go and am getting the one after that ready as well!
