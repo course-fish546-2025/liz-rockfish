@@ -1,0 +1,317 @@
+---
+title: "Week 06 Project Updates"
+format: revealjs
+editor: visual
+---
+
+## Liz Rockfish Updates
+
+\
+
+Welcome to a tale of many trials and few triumphs!\
+
+Here is a picture of a copper rockfish to get the energy up:\
+
+![I mean, just look at it!!](copperrockfish.jpg)
+
+## Objective of this project
+
+\
+
+I will be taking RAD-seq data from three species of closely-related rockfish species (*Sebastes spp.*) through a bioinformatics processing pipeline and producing a PCA plot that displays population structure clusters.
+
+## Steps in the pipeline {.smaller}
+
+\
+
+1.  Run QC on raw sequence data using FastQC and interactively visualizing with MultiQC
+2.  Demultiplex to the individual sample level using the STACKS `process_radtags` program and remove PCR duplicates with `clone_filter`
+3.  Align to the honeycomb rockfish genome (the closest relative that has a reference-quality genome assembly) using `bowtie2`
+4.  Use `gstacks` and `populations` modules in STACKS to perform SNP calling and basic statistics
+5.  Create PCA plots using `adegenet`, an R package, to examine inter- and intraspecific population structure patterns & clustering
+
+## MultiQC results
+
+![FastQC sequence counts](fastqc_sequence_counts_plot.png)
+
+## MultiQC results continued
+
+![FastQC sequence quality](fastqc_per_base_sequence_quality_plot.png)
+
+## Demultiplexing: disaster?
+
+\
+Demultiplexing is normally a pretty standard step in the pipeline, but my data has decided to send me on a journey instead :)\
+
+So I will be sharing where I'm at and how I got there!
+
+## A look at my data {.smaller}
+\
+
+Here is what a peek at my raw sequence file - R1, or the forward read - looks like using the `head` command:
+
+```
+[lizboggs@klone-login03 radseq_data]$ zcat GC3F-LB-10209---8853_S0_L003_R1_001.fastq.gz | head
+@A01335:621:H5WGLDSXF:3:1101:1036:1000 1:N:0:GCCAAT+AGATCT
+GGACAGCAGATGCAGGCATGCGCCATGGAGATTAGCTACACCGCAGTGGCGTGGAACACATAACAGGCTCATTAGGTAGCATATTCTCCAGGAGGCATGCGCCTATGGAGAATAGCCACACCGCAGTGGCGTGGAACACATAACAGGCTCACTAGGTAT
++
+FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF,FFFFFFFF:FFF,FFFFFFFFFFFFFFFFF:FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF:F:FFF,FFFFFF:FFFFFFFFFFFFFF:,FFFFFFFFFFFF:FF::,
+@A01335:621:H5WGLDSXF:3:1101:1072:1000 1:N:0:CGATGT+AGATCT
+CGGAGGAGCAGGTGTTGATGGGGCCGTTCTTCATCTGCTCCAGAGTGTCCAGCACCACGTCGGGAGCCGGCCGGCAGCCCTGCCGCTCCACCTGCCTCAACTCGCCCACAGCCACCGTCACCGTCACCTCGAAGTCCTGCATGTCTATCCCAGATCGGA
++
+F:FFFFF:F:FFFF,::F:FF:,F,FFF::F:FF:F,F,::FFFF,,F,FF,FFFFF:,FFFFFF,FF:FF:,:FF,FFF,::F,F,:F:,FF:FF,:FFF,,,,FF,,F,:::::,,FFFF,,:,:F::,F,:,F,,,F:,:F:,F,,FFFFFF,,,,
+@A01335:621:H5WGLDSXF:3:1101:1090:1000 1:N:0:ATCACG+AGATCT
+CCACCACACAGCCGCCCTCCAGCTCACCACGGCCCTCAGCCTCTTCACGAGCTGCAACCACCACACAGCTGCCCTCCACCTCACCACGGCCCTCAGCCTCTTTGCGAGCTGCCCCCTCCACACAGCTGCTCTCCACCTCACCACGGCCCTCAGCCTCTT
+```
+\
+The first line is the sequence header (unique to each read), second line is the read itself, third is a `+` separator line, and fourth is a Phred quality score for each base
+
+## A look at my code {.smaller}
+\
+Here is the script I am using to run *STACKS* `process_radtags` on my data:
+
+```
+#!/bin/bash
+#SBATCH --job-name=process_radtags_rfnewbarcode_lib5_712fix
+#SBATCH --account=merlab
+#SBATCH --partition=compute-hugemem
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=32
+#SBATCH --time=2-16:00:00
+#SBATCH --mem=500G
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=lizboggs@uw.edu
+
+
+##### ENVIRONMENT SETUP ##########
+module purge
+source /gscratch/merlab/software/miniconda3/etc/profile.d/conda.sh
+conda activate stacks_env
+
+# Set paths
+RAWDIR=/mmfs1/gscratch/merlab/lizboggs/radseq_data
+OUTDIR=/mmfs1/gscratch/scrubbed/lizboggs/newbarcodedemux_lib5indx712
+BARCODE_DIR=/mmfs1/gscratch/merlab/lizboggs/barcodes
+
+process_radtags \
+  -1 ${RAWDIR}/GC3F-LB-10209---8853_S0_L003_R1_001.fastq.gz \
+  -2 ${RAWDIR}/GC3F-LB-10209---8853_S0_L003_R2_001.fastq.gz \
+  -b ${BARCODE_DIR}/allbarcodes_new_withlib5indx712fix.txt \
+  -o ${OUTDIR} \
+  --renz_1 sbfI \
+  --inline_index \
+  -i gzfastq \
+  -y fastq \
+  -E phred33 \
+  --bestrad \
+  -q \
+  --filter_illumina \
+  -c \
+  -t 130 \
+  --adapter_1 AGATCGGAAGAGCACACGTCTGAACTCCAGTCA \
+  --adapter_2 AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT \
+  -r \
+  --barcode_dist_1 1 \
+  --barcode_dist_2 1
+
+# Close environment
+conda deactivate
+```
+## The output from this code (after a 63.5-hour job run!) {.smaller}
+\
+
+
+```
+  6228064294 total reads; -0 failed Illumina reads; -3580073710 ambiguous barcodes; -28122894 ambiguous RAD-Tags; +83758324 recovered; -5554816 low quality reads; 2563948807 retained reads.
+    50364067 reads with adapter sequence.
+Closing files, flushing buffers...done.
+
+6228064294 total sequences
+1494217429 reads were transposed [based on the BestRAD flag] (24.0%)
+         0 failed Illumina filtered reads (0.0%)
+  50364067 reads contained adapter sequence (0.8%)
+3580073710 barcode not found drops (57.5%)
+   5554816 low quality read drops (0.1%)
+  28122894 RAD cutsite not found drops (0.5%)
+2563948807 retained reads (41.2%)
+```
+\
+Only 41.2% of reads retained and 57.5% "barcode not found" drops... something is up.
+
+## THE LIKELY CULPRIT: the barcodes {.smaller}
+\
+
+*Some important background:* reads are demultiplexed based on their indexes. In order for `process_radtags` to know which reads are what, it needs to be told where to find the indexes.\
+\
+
+This is done with program flags - in my case, I used the flag `--inline_index`, as my 10 base-pair *individual* barcodes are *inline,* ie. they are found in the actual read. My **library** index - ie. which library the individual belonged to - is found in the **header.**\
+\
+
+I'll show on the next slide why this organization is causing an issue in my processing.
+
+## Index mix-up {.smaller}
+\
+
+When using the command `grep -A 20 "barcodes_not_recorded" process_radtags.radseq_data.log`, which pulls all "barcodes not recorded" (ie. dropped), it reports this:\
+
+```
+BEGIN barcodes_not_recorded
+# A list and count of barcodes found that were not specified in the barcodes input file.
+Barcode Total
+GGGAGCTGAA-AGATCT       104988366
+GGAAACATCG-AGATCT       88023132
+GGCCGTGAGA-AGATCT       55435788
+GGGACAGTGC-AGATCT       52357626
+GGCGAACTTA-AGATCT       51776254
+GGACCACTGT-AGATCT       50442810
+GGGATAGACA-AGATCT       50208624
+GGCATCAAGT-AGATCT       46791976
+GGAACGCTTA-AGATCT       44114520
+GGATCCTGTA-AGATCT       44070132
+GGTCCGTCTA-AGATCT       42453748
+GGAGAGTCAA-AGATCT       40700258
+GGCCTCCTGA-AGATCT       40518226
+GGCGCATACA-AGATCT       40145892
+GGTGGTGGTA-AGATCT       38694062
+GGCAAGACTA-AGATCT       38661102
+GGTGAAGAGA-AGATCT       37881860
+GGAATCCGTC-AGATCT       37656988
+--
+END barcodes_not_recorded
+```
+
+## Why that's a problem {.smaller}
+\
+
+It seems to be matching a handful of the 10bp *individual* barcodes with the 6bp i5 Illumina barcode that is on every read, and thus... it can't assign those reads to a single individual, **because 4-5 individuals will have both of those barcodes attached to them.**
+
+Reviewing this section of my R1 file:\
+
+```
+@A01335:621:H5WGLDSXF:3:1101:1036:1000 1:N:0:GCCAAT+AGATCT
+GGACAGCAGATGCAGGCATGCGCCATGGAGATTAGCTACACCGCAGTGGCGTGGAACACATAACAGGCTCATTAGGTAGCATATTCTCCAGGAGGCATGCGCCTATGGAGAATAGCCACACCGCAGTGGCGTGGAACACATAACAGGCTCACTAGGTAT
+```
+The library index is the first in the index+index pair; here it is GCCAAT, which is the index for my library 5. The second in that pair is that Illumina i5 index that is on every read. The 10bp individual barcode is the first 10bp of the actual read. So while `process_radtags` is correctly reading at least 40% of reads correctly - pulling the first index barcode and pairing it with its respective individual barcode - it has also paired the wrong ones together and doesn't know what to do with them, so it drops them as "not found."
+
+## What's next {.smaller}
+\
+1. Cry (check! Just kidding... maybe)\
+
+2. Field as much help as possible, from lab mates to the internet, ie. Bioinformatics Stack Exchange (check!)\
+
+3. Contact the sequencing facility and make it their problem by sending my data back for THEM to demux (very close to doing this...)\
+
+4. Once data is finally demux'd in whatever way... continue with pipeline!!!\
+
+## In the meantime...
+\
+
+I still need to prove my proficiency in making a Quarto presentation, so let's do some other fun things with my metadata instead
+
+## Check it out! A table of samples!
+
+| Species   | # of Samples  |
+|-----------|---------------|
+| Brown     |      97       |
+| Copper    |     181       |
+| Quillback |     217       |
+
+: Rockfish samples by species {.striped .hover tbl-colwidths="[60,25]"}
+
+This is in total, accounting for combining my rockfish with those from a previous study (not done by me). Lots of fish!
+
+## Plot time
+
+```{r}
+##### NOTE FOR STEVEN: this code works just fine in my RStudio but bugs out in Raven, lol. Trust that it made the plot that I put in the Quarto presentation... Sorry!!!!
+# install packages if not already done
+# install.packages("ggplot2")
+# install.packages("sf")
+# install.packages("rnaturalearth")
+# install.packages("readr")
+# install.packages("rnaturalearthhires")
+# install.packages("dplyr")
+
+# Load required packages
+# library(ggplot2)
+# library(sf)
+# library(rnaturalearth)
+# library(readr)
+# library(rnaturalearthhires)
+# library(dplyr)
+
+
+# Read your CSV file (replace 'your_data.csv' with your actual file name)
+# rockfishdata <- read_csv("liz_anita_rf_latlong_v2.csv")
+
+# Ensure your latitude and longitude columns are numeric
+# rockfishdata$lat <- as.numeric(rockfishdata$lat)
+# rockfishdata$long <- as.numeric(rockfishdata$long)
+
+# Count number of individuals per species
+# species_counts <- as.data.frame(table(rockfishdata$species))
+
+# Generate legend text correctly
+# legend_text <- paste(species_counts$Var1, species_counts$Freq, sep = ": ", collapse = "\n")
+
+# Load high-resolution land polygons
+# land <- ne_countries(scale = "large", returnclass = "sf")
+
+# Load detailed coastline data
+# coastline <- ne_coastline(scale = "large", returnclass = "sf")
+
+# Define the Pacific Northwest region (approximate lat/lon range)
+# xlim <- c(-126.5, -122)  # Longitude range
+# ylim <- c(47, 50.25)       # Latitude range
+
+# rockfishdata$origin <- as.factor(rockfishdata$origin)
+# rockfishdata$origin <- trimws(rockfishdata$origin)
+# str(rockfishdata$origin)
+# unique(rockfishdata$origin)
+# rockfishdata$origin <- factor(rockfishdata$origin, levels = c("Wray 2022", "New (Liz)"))
+# levels(rockfishdata$origin)
+
+# ggplot(rockfishdata, aes(x = long, y = lat, shape = origin)) +
+#  geom_point(size = 4)
+
+#ggplot(rockfishdata) +
+#  geom_sf(data = land, fill = "gray", color = "black") +  
+#  geom_sf(data = coastline, fill = "gray80", color = "black") +  
+#  geom_sf(data = coastline, color = "black", linewidth = 0.3) +  
+#  geom_point(aes(x = long, y = lat, fill = species, shape = origin), 
+#             size = 2.5, color = "black", stroke = 1, alpha = 0.5) +
+#  scale_shape_manual(values = c("New (Liz)" = 21, "Wray 2022" = 24)) +
+#  coord_sf(xlim = xlim, ylim = ylim, expand = FALSE) +  
+#  theme_minimal() +
+  
+  # Use faceting to split by species
+#  facet_wrap(~ species, nrow = 1) +  
+  
+#  scale_fill_manual(
+#    name = "Species",
+#    values = c("Brown Rockfish" = "brown", "Copper Rockfish" = "orange", "Quillback Rockfish" = "purple")
+#  ) +
+#  
+#  labs(title = "Salish Sea and WA/BC Coastal Rockfish Samples", 
+#       x = "Longitude", 
+#       y = "Latitude",
+#      shape = "Sample Origin") +
+#  
+#  guides(
+#    fill = guide_legend(override.aes = list(shape = 21, size = 3))  # Forces filled circles for species legend
+#  ) +
+  
+#  theme(
+#    legend.position = "bottom",
+#    legend.background = element_rect(fill = "white", color = "black", size = 0.5),
+#    legend.title = element_text(size = 12, face = "bold"),
+#    legend.text = element_text(size = 10)
+#  )
+
+```
+
+![Plot of my rockfish samples by species!](rfsamplemap_noCAMXHG_origin_incl.png)
+
+## That's all for now!
+\
+I hope this demonstrated my ability to work with Quarto and showed off my very neat very fun coding adventure... hopefully have a good result soon!
