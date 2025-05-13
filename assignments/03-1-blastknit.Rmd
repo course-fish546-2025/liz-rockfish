@@ -1,5 +1,5 @@
 ---
-title: "Week 3 - BLAST Report - now Knitted!"
+title: "Week 3 BLAST Report - now Knitted!"
 author: "Liz Boggs"
 date: "`r format(Sys.Date(), '%B %d, %Y')`"
 output: 
@@ -11,15 +11,13 @@ output:
     code_folding: show
 ---
 
-# Week 3 - Knitting BLAST Report
+This report uses NCBI BLAST and UniProt protein sequences to identify genes in a given set of unknown sequences.
 
-## This report uses NCBI BLAST and UniProt protein sequences to identify genes in a given set of unknown sequences.
-
-### 1. Download BLAST from NCBI using `curl` 
+# Download BLAST from NCBI using `curl` 
 
 *NOTE: make sure to pick the correct operating system version from the executables page from the URL!*
 
-```{bash}
+```{bash, eval = FALSE}
 
 cd /home/shared/8TB_HDD_02/lizboggs/applications # absolute path - user needs to change to where they want it!
 curl -O https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/ncbi-blast-2.16.0+-x64-linux.tar.gz
@@ -29,17 +27,17 @@ tar -xf ncbi-blast-2.16.0+-x64-linux.tar.gz # retrieves the files in a gzip
 
 *An additional note here - I prefer not to use absolute paths, obviously, for the sake of the exercise and making sure things are where they should be I kept this one absolute*
 
-### 2. Double checking that the download worked by using the `-h` command (help):
+# Double checking that the download worked by using the `-h` command (help):
 
-```{bash}
+```{bash, eval = FALSE}
 
 ~/applications/ncbi-blast-2.16.0+/bin/blastx -h # pulls up blastx usage options
 
 ```
 
-### 3. Downloading a file of known sequences from UniProt/SwissProt
+# Downloading a file of known sequences from UniProt/SwissProt
 
-```{bash}
+```{bash, eval = FALSE}
 
 cd /home/shared/8TB_HDD_02/lizboggs/blastdb # this is where the database files will live
 
@@ -53,94 +51,95 @@ ls # list out the files to make sure they're there
 
 ```
 
-### 4. Making our BLAST database
+# Making our BLAST database
 
-```{bash}
+```{bash, eval = FALSE}
 
 /home/shared/8TB_HDD_02/lizboggs/applications/ncbi-blast-2.16.0+/bin/makeblastdb \
 -in ~/blastdb/uniprot_sprot_r2025_01.fasta \
 -dbtype prot \
--out ~/blastdb/uniprot_sprot_r2025_01
+-out /home/shared/8TB_HDD_02/lizboggs/blastdb/uniprot_sprot_r2025_01
 
 ```
 
-### 5. Getting the query sequence (our unknown)
+# Getting the query sequence (our unknown)
 
-```{bash}
+```{bash, eval = FALSE}
 
-curl https://eagle.fish.washington.edu/cnidarian/Ab_4denovo_CLC6_a.fa \ 
--k \
+curl https://eagle.fish.washington.edu/cnidarian/Ab_4denovo_CLC6_a.fa \
 > ~/blastdb/Ab_4denovo_CLC6_a.fa
 
-head ~/blastdb/Ab_4denovo_CLC6_a.fa
-echo "How many sequences are there?" # output for next line
-grep -c ">" ~/blastdb/Ab_4denovo_CLC6_a.fa # count of sequences
+head /home/shared/8TB_HDD_02/lizboggs/blastdb/Ab_4denovo_CLC6_a.fa
+echo "How many sequences are there?"
+grep -c ">" ~/blastdb/Ab_4denovo_CLC6_a.fa
 
 ```
 
-### 6. Running the BLAST program to find matches for our sequence
+# Running the BLAST program to find matches for our sequence
 
-```{bash}
+```{bash, eval = FALSE}
 
 ~/applications/ncbi-blast-2.16.0+/bin/blastx \
--query ~/blastdb/Ab_4denovo_CLC6_a.fa \
--db ~/blastdb/uniprot_sprot_r2025_01 \
--out ~/output/Ab_4-uniprot_blastx.tab \
+-query /home/shared/8TB_HDD_02/lizboggs/blastdb/Ab_4denovo_CLC6_a.fa \
+-db /home/shared/8TB_HDD_02/lizboggs/blastdb/uniprot_sprot_r2025_01 \
+-out ~/home/shared/8TB_HDD_02/lizboggs/output/Ab_4-uniprot_blastx.tab \
 -evalue 1E-20 \
 -num_threads 16 \
 -max_target_seqs 1 \
 -outfmt 6
 
-head -2 ~/output/Ab_4-uniprot_blastx.tab # showing the top 2 results
-wc -l ~/output/Ab_4-uniprot_blastx.tab # counting the output
+# showing the top 2 results
+head -2 ~/output/Ab_4-uniprot_blastx.tab
+# counting the output
+wc -l ~/output/Ab_4-uniprot_blastx.tab
 
 ```
 
-### 7. Retrieving the annotation table for the BLAST output
+# Retrieving the annotation table for the BLAST output
 
-#### These next `curl` commands will grab annotation information from UniProt.
+## These next `curl` commands will grab annotation information from UniProt.
 
-```{bash}
+```{bash, eval = FALSE}
 
 curl -O -H "Accept: text/plain; format=tsv" "https://rest.uniprot.org/uniprotkb/search?query=reviewed:true+AND+organism_id:9606"
 
 ```
 
-```{bash}
+```{bash, eval = FALSE}
 curl -O -H "Accept: text/plain; format=tsv" "https://rest.uniprot.org/uniprotkb/stream?compressed=true&fields=accession%2Creviewed%2Cid%2Cprotein_name%2Cgene_names%2Corganism_name%2Clength&format=tsv&query=%28*%29+AND+%28reviewed%3Atrue%29"
 
 ```
 
-### 8. Joining BLAST with annotations
+# Joining BLAST with annotations
 
-#### Now we need to join the tables we've made in order to understand the unknown sequences' function(s).
+## Now we need to join the tables we've made in order to understand the unknown sequences' function(s).
 
-#### Let's check the outputted file first:
+### Let's check the outputted file first:
 
-```{bash}
+```{bash, eval = FALSE}
 head -2 ~/output/Ab_4-uniprot_blastx.tab
 wc -l ~/output/Ab_4-uniprot_blastx.tab
 ```
 
-#### Pull out the accession number:
+## Pull out the accession number:
 
-```{bash}
+```{bash, eval = FALSE}
 head -2 ~/output/Ab_4-uniprot_blastx.tab | tr '|' '\t'
 
 ```
 
-#### Save it so we can use it.
+## Save it so we can use it!
 
-```{bash}
+```{bash, eval = FALSE}
 tr '|' '\t' < ~/output/Ab_4-uniprot_blastx.tab \
 > ~/output/Ab_4-uniprot_blastx_sep.tab
 ```
 
-### Time to join the tables!
+# Time to join the tables!
 
-#### `kable` will help us produce a prettier output
+## `kable` will help us produce a prettier output
 
-```{r}
+```{r, eval = FALSE}
 library(tidyverse)
 library(kableExtra)
 
