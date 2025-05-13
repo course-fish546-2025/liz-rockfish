@@ -11,4 +11,4 @@ This involves:
   4. Use `gstacks` and `populations` modules in *STACKS* to perform SNP calling and basic statistics
   5. Create PCA plots using *adegenet,* an R package, to examine inter- and intraspecific population structure patterns & clustering
 
-More information to come!
+Week 06 project updates: https://rpubs.com/lizboggs/week06projectupdates-fish546
