@@ -1,5 +1,5 @@
 ---
-title: "Week 3 - Differential Gene Expression Report - now Knitted!"
+title: "Week 3 Differential Gene Expression Report - now Knitted!"
 author: "Liz Boggs"
 date: "`r format(Sys.Date(), '%B %d, %Y')`"
 output: 
@@ -15,22 +15,20 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Week 3 - Knitting my Differential Gene Expression Report
+This report looks at differential expression in RNA-seq data using `kallisto`, which will create a matrix that can be displayed in a table or plot. Or in this case, both!
 
-### This report looks at differential expression in RNA-seq data using `kallisto`, which will create a matrix that can be displayed in a table or plot. Or in this case, both!
+# Downloading the reference genome for our target species, *C. gigas*
 
-### 1. Downloading the reference genome for our target species, *C. gigas*
-
-```{bash}
+```{bash, eval = FALSE}
 
 cd ~/diffge
 curl --insecure -O https://gannet.fish.washington.edu/seashell/bu-github/nb-2023/Cgigas/data/rna.fna
 
 ```
 
-### 2. Index our `rna.fna` file whilst renaming it
+# Index our `rna.fna` file whilst renaming it
 
-```{bash}
+```{bash, eval = FALSE}
 /home/shared/kallisto/kallisto \
 index -i \
 ~/diffge/cgigas_roslin_rna.index \
@@ -38,9 +36,9 @@ index -i \
 
 ```
 
-### 3. Download our RNA-seq reads to our data folder
+# Download our RNA-seq reads to our data folder
 
-```{bash}
+```{bash, eval = FALSE}
 cd ~/diffge 
 wget --recursive --no-parent --no-directories \
 --no-check-certificate \
@@ -49,9 +47,9 @@ https://gannet.fish.washington.edu/seashell/bu-github/nb-2023/Cgigas/data/nopp/
 
 ```
 
-### 4. Creating a sub-directory and running `kallisto`
+# Creating a sub-directory and running `kallisto`
 
-```{bash}
+```{bash, eval = FALSE}
 mkdir ~/diffge/kallisto_01
 
 find ~/diffge/*fastq.gz \
@@ -63,11 +61,11 @@ quant -i ~/diffge/cgigas_roslin_rna.index \
 
 ```
 
-### 5. Gene expression matrix
+# Gene expression matrix
 
 Now we'll take our `kallisto` files and form a gene expression matrix:
 
-```{bash}
+```{bash, eval = FALSE}
 perl /home/shared/trinityrnaseq-v2.12.0/util/abundance_estimates_to_matrix.pl \
 --est_method kallisto \
     --gene_trans_map none \
@@ -100,27 +98,27 @@ perl /home/shared/trinityrnaseq-v2.12.0/util/abundance_estimates_to_matrix.pl \
     
 ```
 
-## Differential expression time!
+# Differential expression time!
 
-### 6. Installing necessary packages
+## Installing necessary packages
 
-```{r}
+```{r,eval = FALSE}
 if (!require("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
 
 BiocManager::install("DESeq2")
 ```
 
-```{r}
+```{r, eval = FALSE}
 install.packages("pheatmap")
 install.packages("RColorBrewer")
 install.packages("data.table")
 ```
 
-### 7. Loading packages \
-#### *NOTE: some of these are already commonly installed, but if you don't have certain packages, add them to the `install.packages` chunk before proceeding!
+##  Loading packages \
+### *NOTE: some of these are already commonly installed, but if you don't have certain packages, add them to the `install.packages` chunk before proceeding!
 
-```{r}
+```{r, eval = FALSE}
 library(DESeq2)
 library(tidyverse)
 library(pheatmap)
@@ -128,9 +126,9 @@ library(RColorBrewer)
 library(data.table)
 ```
 
-### 8. Creating the matrix
+## Creating the matrix
 
-```{r}
+```{r, eval = FALSE}
 countmatrix <- read.delim("~/diffge/kallisto_01.isoform.counts.matrix", header = TRUE, sep = '\t')
 rownames(countmatrix) <- countmatrix$X
 countmatrix <- countmatrix[,-1]
@@ -138,18 +136,18 @@ head(countmatrix)
 
 ```
 
-### 9. Rounding up integers to whole numbers
+## Rounding up integers to whole numbers
 
-```{r}
+```{r, eval = FALSE}
 
 countmatrix <- round(countmatrix, 0)
 str(countmatrix)
 
 ```
 
-### 10. Finding our differentially expressed genes based on dessication
+# Finding our differentially expressed genes based on dessication
 
-```{r}
+```{r, eval = FALSE}
 
 deseq2.colData <- data.frame(condition=factor(c(rep("control", 12), rep("desicated", 12))), 
                              type=factor(rep("single-read", 24)))
@@ -160,7 +158,7 @@ deseq2.dds <- DESeqDataSetFromMatrix(countData = countmatrix,
 
 ```
 
-```{r}
+```{r,eval = FALSE}
 
 deseq2.dds <- DESeq(deseq2.dds)
 deseq2.res <- results(deseq2.dds)
@@ -173,11 +171,11 @@ dim(deseq2.res[!is.na(deseq2.res$padj) & deseq2.res$padj <= 0.05, ])
 
 ```
 
-### 11. Making a volcano plot!
+# Making a volcano plot!
 
 The below plot will visualize our differentially-expressed genes.
 
-```{r}
+```{r, eval = FALSE}
 
 tmp <- deseq2.res
 # The main plot
@@ -193,9 +191,9 @@ abline(h=c(-1,1), col="blue")
 
 ```
 
-### 12. Writing our differentially-expressed genes to a table in a directory (we want to keep these!)
+# Writing our differentially-expressed genes to a table in a directory (we want to keep these!)
 
-```{r}
+```{r, eval = FALSE}
 
 write.table(tmp.sig, "~/diffge/DEGlist.tab", row.names = T)
 
