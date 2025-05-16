@@ -4,7 +4,7 @@ format: html
 editor: visual
 ---
 
-Rpubs link: 
+Rpubs link: https://rpubs.com/lizboggs/cgmotif-assignment07
 
 ```{r}
 # first install `seqinr` if not already on machine!
@@ -64,6 +64,7 @@ Check out the rests of the index creation
 ```{r engine='bash', eval=TRUE}
 head -1 ~/liz-rockfish/assignments/output/10-seqs.fasta.fai
 ```
+
 Time to use fuzznuc to find CG motifs!
 
 ```{bash}
