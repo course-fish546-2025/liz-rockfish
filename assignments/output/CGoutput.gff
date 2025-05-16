@@ -1,0 +1,90 @@
+##gff-version 3
+##sequence-region 4116 1 159
+#!Date 2025-05-16
+#!Type DNA
+#!Source-version EMBOSS 6.6.0.0
+4116	fuzznuc	nucleotide_motif	99	100	2	+	.	ID=4116.1;note=*pat pattern:CG
+##gff-version 3
+##sequence-region 3756 1 159
+#!Date 2025-05-16
+#!Type DNA
+#!Source-version EMBOSS 6.6.0.0
+3756	fuzznuc	nucleotide_motif	27	28	2	+	.	ID=3756.1;note=*pat pattern:CG
+3756	fuzznuc	nucleotide_motif	33	34	2	+	.	ID=3756.2;note=*pat pattern:CG
+3756	fuzznuc	nucleotide_motif	57	58	2	+	.	ID=3756.3;note=*pat pattern:CG
+##gff-version 3
+##sequence-region 6057 1 159
+#!Date 2025-05-16
+#!Type DNA
+#!Source-version EMBOSS 6.6.0.0
+6057	fuzznuc	nucleotide_motif	139	140	2	+	.	ID=6057.1;note=*pat pattern:CG
+6057	fuzznuc	nucleotide_motif	151	152	2	+	.	ID=6057.2;note=*pat pattern:CG
+##gff-version 3
+##sequence-region 4773 1 159
+#!Date 2025-05-16
+#!Type DNA
+#!Source-version EMBOSS 6.6.0.0
+4773	fuzznuc	nucleotide_motif	94	95	2	+	.	ID=4773.1;note=*pat pattern:CG
+##gff-version 3
+##sequence-region 3349 1 159
+#!Date 2025-05-16
+#!Type DNA
+#!Source-version EMBOSS 6.6.0.0
+3349	fuzznuc	nucleotide_motif	105	106	2	+	.	ID=3349.1;note=*pat pattern:CG
+3349	fuzznuc	nucleotide_motif	107	108	2	+	.	ID=3349.2;note=*pat pattern:CG
+##gff-version 3
+##sequence-region 23563 1 159
+#!Date 2025-05-16
+#!Type DNA
+#!Source-version EMBOSS 6.6.0.0
+23563	fuzznuc	nucleotide_motif	130	131	2	+	.	ID=23563.1;note=*pat pattern:CG
+23563	fuzznuc	nucleotide_motif	157	158	2	+	.	ID=23563.2;note=*pat pattern:CG
+##gff-version 3
+##sequence-region 22028 1 159
+#!Date 2025-05-16
+#!Type DNA
+#!Source-version EMBOSS 6.6.0.0
+22028	fuzznuc	nucleotide_motif	23	24	2	+	.	ID=22028.1;note=*pat pattern:CG
+22028	fuzznuc	nucleotide_motif	32	33	2	+	.	ID=22028.2;note=*pat pattern:CG
+22028	fuzznuc	nucleotide_motif	50	51	2	+	.	ID=22028.3;note=*pat pattern:CG
+22028	fuzznuc	nucleotide_motif	58	59	2	+	.	ID=22028.4;note=*pat pattern:CG
+22028	fuzznuc	nucleotide_motif	61	62	2	+	.	ID=22028.5;note=*pat pattern:CG
+22028	fuzznuc	nucleotide_motif	64	65	2	+	.	ID=22028.6;note=*pat pattern:CG
+22028	fuzznuc	nucleotide_motif	72	73	2	+	.	ID=22028.7;note=*pat pattern:CG
+22028	fuzznuc	nucleotide_motif	77	78	2	+	.	ID=22028.8;note=*pat pattern:CG
+22028	fuzznuc	nucleotide_motif	115	116	2	+	.	ID=22028.9;note=*pat pattern:CG
+22028	fuzznuc	nucleotide_motif	121	122	2	+	.	ID=22028.10;note=*pat pattern:CG
+22028	fuzznuc	nucleotide_motif	133	134	2	+	.	ID=22028.11;note=*pat pattern:CG
+22028	fuzznuc	nucleotide_motif	136	137	2	+	.	ID=22028.12;note=*pat pattern:CG
+22028	fuzznuc	nucleotide_motif	152	153	2	+	.	ID=22028.13;note=*pat pattern:CG
+##gff-version 3
+##sequence-region 4131 1 159
+#!Date 2025-05-16
+#!Type DNA
+#!Source-version EMBOSS 6.6.0.0
+4131	fuzznuc	nucleotide_motif	59	60	2	+	.	ID=4131.1;note=*pat pattern:CG
+4131	fuzznuc	nucleotide_motif	92	93	2	+	.	ID=4131.2;note=*pat pattern:CG
+4131	fuzznuc	nucleotide_motif	101	102	2	+	.	ID=4131.3;note=*pat pattern:CG
+4131	fuzznuc	nucleotide_motif	145	146	2	+	.	ID=4131.4;note=*pat pattern:CG
+4131	fuzznuc	nucleotide_motif	157	158	2	+	.	ID=4131.5;note=*pat pattern:CG
+##gff-version 3
+##sequence-region 18239 1 159
+#!Date 2025-05-16
+#!Type DNA
+#!Source-version EMBOSS 6.6.0.0
+18239	fuzznuc	nucleotide_motif	5	6	2	+	.	ID=18239.1;note=*pat pattern:CG
+18239	fuzznuc	nucleotide_motif	18	19	2	+	.	ID=18239.2;note=*pat pattern:CG
+18239	fuzznuc	nucleotide_motif	25	26	2	+	.	ID=18239.3;note=*pat pattern:CG
+18239	fuzznuc	nucleotide_motif	39	40	2	+	.	ID=18239.4;note=*pat pattern:CG
+18239	fuzznuc	nucleotide_motif	51	52	2	+	.	ID=18239.5;note=*pat pattern:CG
+18239	fuzznuc	nucleotide_motif	68	69	2	+	.	ID=18239.6;note=*pat pattern:CG
+18239	fuzznuc	nucleotide_motif	102	103	2	+	.	ID=18239.7;note=*pat pattern:CG
+18239	fuzznuc	nucleotide_motif	104	105	2	+	.	ID=18239.8;note=*pat pattern:CG
+##gff-version 3
+##sequence-region 6198 1 159
+#!Date 2025-05-16
+#!Type DNA
+#!Source-version EMBOSS 6.6.0.0
+6198	fuzznuc	nucleotide_motif	38	39	2	+	.	ID=6198.1;note=*pat pattern:CG
+6198	fuzznuc	nucleotide_motif	101	102	2	+	.	ID=6198.2;note=*pat pattern:CG
+6198	fuzznuc	nucleotide_motif	114	115	2	+	.	ID=6198.3;note=*pat pattern:CG

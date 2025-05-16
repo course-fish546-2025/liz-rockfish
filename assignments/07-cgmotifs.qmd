@@ -1,0 +1,71 @@
+---
+title: "Week 07: CG Motifs"
+format: html
+editor: visual
+---
+
+Rpubs link: 
+
+```{r}
+# first install `seqinr` if not already on machine!
+# install.packages("seqinr")
+
+library(seqinr)
+
+# Replace 'input.fasta' with the name of your multi-sequence fasta file
+input_file <- "~/liz-rockfish/assignments/data/test_R1_seq_lib01.fasta"
+sequences <- read.fasta(input_file)
+
+```
+
+```{r}
+# Set the seed for reproducibility (optional)
+set.seed(42)
+
+number_of_sequences_to_select <- 10
+
+if (length(sequences) < number_of_sequences_to_select) {
+  warning("There are fewer than 10 sequences in the fasta file. All sequences will be selected.")
+  number_of_sequences_to_select <- length(sequences)
+}
+
+selected_indices <- sample(length(sequences), number_of_sequences_to_select)
+selected_sequences <- sequences[selected_indices]
+
+```
+
+```{r}
+# Replace 'output.fasta' with your desired output file name
+output_file <- read.fasta("~/liz-rockfish/assignments/output/10-seqs.fasta")
+
+```
+
+```{r, eval = FALSE}
+write.fasta(sequences = selected_sequences, names = selected_sequences, file.out = write_fasta_out, open = "w")
+
+```
+
+```{bash}
+#likely will not need; fix issue where gff and fa name did not match
+sed -i 's/>lcl|/>/g' ~/liz-rockfish/assignments/output/10-seqs.fasta
+```
+
+Create an index of our `10-seqs` file
+
+```{bash}
+#needed downstream for IGV
+/home/shared/samtools-1.12/samtools faidx \
+~/liz-rockfish/assignments/output/10-seqs.fasta
+
+```
+
+Check out the rests of the index creation
+
+```{r engine='bash', eval=TRUE}
+head -1 ~/liz-rockfish/assignments/output/10-seqs.fasta.fai
+```
+Time to use fuzznuc to find CG motifs!
+
+```{bash}
+fuzznuc -sequence ~/liz-rockfish/assignments/output/10-seqs.fasta -pattern CG -rformat gff -outfile ~/liz-rockfish/assignments/output/CGoutput.gff
+```
