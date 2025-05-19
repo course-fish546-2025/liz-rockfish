@@ -1,0 +1,26 @@
+---
+title: "Week 08 Question Set"
+output: html_document
+date: "2025-05-19"
+---
+
+a)  **What is a genomic range and what 3 types of information do you need for a range?**\
+    A genomic range is a specific spot of a genome, ie. a region like a gene or exon.\
+    Information needed:
+    -   Chromosome (chromosome where the target area exists)
+
+    -   Start position on chromosome
+
+    -   End position on chromosome
+
+```{=html}
+<!-- -->
+```
+b)  **What does 0-based and 1-based refer to? What are the advantages and disadvantages of each?**\
+0-based and 1-based are referring to sequence coordinate systems, which is one way that start and end position information is described. An advantage to the 1-based system is that it is generally more intuitive at first, given that the start and end positions are included in the range, but it can then become more unintuitive for some calculations, such as finding how many bases a range spans, necessitating a +1 to the `end - start` calcuation. On the flip side, 0-based systems are a bit uncomfy at first using a half-closed, half-open interval notation, but they are generally easier to use when it comes to calculations and representing features between bases - they support zero-width features, which would be needed for certain tasks like cutting sequences based on restriction enzyme.
+
+c)  **What is the value of BEDtools over the bioconductor package GenomicRange?**\
+The biggest benefit of using BEDtools is being able to run subcommands on your data in the command line, which is much faster and easier with the BEDtools toolset than having to manipulate that same data in R with GenomicRanges, especially if you're working with a large amount of data.
+
+d)  **Describe one subcommand of the BEDtools suite as well as a practical use case.**\
+One subcommand of BEDtools is `bedtools coverage`, which calculates the coverage of a set of intervals over another. For example, a default run of `bedtools coverage -a A.bed -b B.bed` would report the features in file B that that overlapped the interval in file B. You might want this information if you are examining a region of interest and would like to know the sequencing coverage of those features.
