@@ -6,3 +6,9 @@ test_R1_seq_lib01.fasta
 test_R1_seq_lib01.*
 assignments*.zip
 .zip
+.bam
+.bai
+.sam
+.bam.bai
+.sorted.bam
+.sorted.bam.bai
