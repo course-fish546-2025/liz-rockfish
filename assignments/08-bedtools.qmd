@@ -1,0 +1,83 @@
+---
+title: "08-bedtools"
+format: html
+editor: visual
+---
+
+*Note:* I have no idea why this doc keeps rendering (unsuccessfully) as an ipynb, I tried everything to fix it from YAML edits to chunks forcing it to render as html and it refused. I even made a whole new doc from scratch (this one) to make sure I had my initial settings correct and yeah, html all the way. So an ipynb it is! Sorry...! If there's an obvious reason I missed, let me know.
+
+
+Grabbing the data (again!)
+
+```{bash, eval = FALSE}
+
+cd ~/home/shared/8TB_HDD_02/lizboggs/bedtools_assign
+curl -O https://gannet.fish.washington.edu/seashell/bu-mox/scrubbed/120321-cvBS/19F_R1_val_1_bismark_bt2_pe.deduplicated.sorted.bam 
+curl -O https://gannet.fish.washington.edu/seashell/bu-mox/scrubbed/120321-cvBS/19F_R1_val_1_bismark_bt2_pe.deduplicated.sorted.bam.bai
+
+```
+
+BED file with gene information:
+
+```{bash, eval = FALSE}
+
+cd ~/home/shared/8TB_HDD_02/lizboggs/bedtools_assign
+curl -O https://eagle.fish.washington.edu/Cvirg_tracks/C_virginica-3.0_Gnomon_genes.bed
+
+```
+
+Converting bam to bed:
+
+```{bash, eval = FALSE}
+
+/home/shared/bedtools2/bin/bedtools bamtobed \
+-i ~/lizboggs/bedtools_assign/19F_R1_val_1_bismark_bt2_pe.deduplicated.sorted.bam \
+> ~/lizboggs/bedtools_assign/08-19F.bed
+
+```
+
+Running BEDtools `coverage`
+
+```{bash, eval = FALSE}
+
+/home/shared/bedtools2/bin/bedtools coverage \
+-a ~/lizboggs/bedtools_assign/C_virginica-3.0_Gnomon_genes.bed \
+-b ~/lizboggs/bedtools_assign/08-19F.bed \
+> ~/lizboggs/bedtools_assign/08-gene-19F-coverage.out
+
+```
+
+Getting a bed file of transposable elements and lncRNAs:
+
+```{bash, eval = FALSE}
+
+cd ~/home/shared/8TB_HDD_02/lizboggs/bedtools_assign
+curl -O http://owl.fish.washington.edu/halfshell/genomic-databank/cgigas_uk_roslin_v1_gene.gff
+curl -O http://owl.fish.washington.edu/halfshell/genomic-databank/cgigas_uk_roslin_v1_rm.te.bed
+curl -O http://owl.fish.washington.edu/halfshell/genomic-databank/cgigas_uk_roslin_v1_lncRNA.gff
+
+```
+
+Running BEDtools `intersect` to find where exactly A and B match up with each other
+
+```{bash, eval = FALSE}
+
+/home/shared/bedtools2/bin/bedtools intersect \
+-a ~/lizboggs/bedtools_assign/cgigas_uk_roslin_v1_gene.gff \
+-b ~/lizboggs/bedtools_assign/cgigas_uk_roslin_v1_rm.te.bed \
+> ~/lizboggs/bedtools_assign/08-gene-TE-intersect.out
+
+head -2 ~/lizboggs/bedtools_assign/08-gene-TE-intersect.out
+
+```
+
+Running BEDtools `closest` to find the nearest features between A and B
+
+```{bash, eval = FALSE}
+
+/home/shared/bedtools2/bin/bedtools closest \
+-a ~/lizboggs/bedtools_assign/cgigas_uk_roslin_v1_lncRNA.gff\
+-b ~/lizboggs/bedtools_assign/cgigas_uk_roslin_v1_gene.gff \
+> ~/lizboggs/bedtools_assign/08-lnc-gene-closet.out
+
+```
