@@ -1,0 +1,14 @@
+---
+title: "Week 09 Question Set"
+output: html_document
+date: "2025-05-27"
+---
+
+1. **What is your goal with respect to your research project to get accomplished this week?**\
+I want to finish aligning my data (after ANOTHER bout over the weekend with some errors - mismatches in read counts and sequence/quality length made me go down a rabbit hole on clone_filter bugs and now I am going a different way with my data to account for that) and then run it through gstacks to get summary statistics. And hopefully pretty plots with that!!
+
+2. **What is the overall status of your research repo? Is it will organized with a clear Readme file? Are file names and directory clear? Would your classmates be able to understand what the code in your files is designed to do?**\
+I think my repo is *fine* but I need to clean it up a bit - I just kinda dumped everything into it and there should be better sub-directories for things like images, updates, etc. I dont want to over-split it because then it's annoying to navigate (especially in cases where there's only like... one file of a certain kind) but it could use a little more org. I hope my code is understandable but it is also pulled from others' scripts, so it's not commented as much as I normally comment on code! I think my Readme is understandable and clear.
+
+3. **Go to one of your classmates rpubs link (see issues). What are three things you think are neat? What are two things that are really not that clear to you?**\
+If we're talking about the rpubs presentations we gave a couple weeks ago, I went to Renee's for this! Three things that are neat: 1) The phylogenetic trees generated with Megan (and I am indeed able to see them on the Quarto pres!), displaying the top hits for soil microbes (and that they are all bacteria), and 3) the project goal outright is just super cool to me - looking at soil metagenomes to get a better grasp on what the makeup of a biofertilizer should be (if I have understood that aim correctly) is really awesome. If I were to pick two things I'm a bit confused on, one would be the reason for merging the forward and reverse reads, and also what kind of sample and library prep these soil metagenomes went through. I have never done metagenome work before so I am so curious how you tell apart genuine metagenome and, if present, contamination during the lab process!
