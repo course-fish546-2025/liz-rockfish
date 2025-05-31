@@ -1,0 +1,31 @@
+---
+title: "Week 08 Project Update"
+output: html_document
+date: "2025-05-23"
+---
+
+Since we are in week 8, it's time for another update!
+
+Given my snafu with the initial demultiplexing, I'm not as far along as I planned to be by this point - but working fast to get there. Regardless, by the end of the quarter, I will have at least *something* interesting to show!
+
+# Where I'm at right now
+
+I successfully got STACKS `clone_filter` to run on my fresh demux data, which removes PCR clones. The average clone removal hovered around 80% clonal reads. This isn't too surprising, given the library prep process for RAD-seq involves PCR steps.
+
+# Up next
+
+I am currently working on getting my script working for alignment using `bowtie2` from a script used by my labmates. There's a couple issues I'm trying to crack with it, but they're much easier than the demux issue I had before! So I am anticipating aligning over the weekend and being able to get summary statistics in the days following. So, yay! I will have graphs that look like this:
+
+![Anita's summary statistics](Raw_Summary_Statistics.png)
+
+This is from Anita Wray's data for her 2022 thesis (and subsequent two publications in 2024). I will be using her brown, copper, and quillback rockfish data in my thesis as well.
+
+# After that
+
+If time and lack of big obstacles allows, I will also create PCA plots and potentially STRUCTURE plots from my data - both intraspecific (within species) and interspecific (between the three species). I will likely use the interspecific plots as my "final" project production as that will take less time to create than 3 separate groups of plots for intraspecific analyses, but if time allows, I'll present them all. Here is an example, using Anita's interspecific data:
+
+![Anita's *STRUCTURE* and PCA plots](anita_interspecific_pca_structureplots.png)
+
+# What that'll show
+
+I'm expecting to see obvious clustering of three species in my interspecific PCA plot (with a small chance of F1 individuals, as seen in Anita's - exactly one F1 between copper and quillback) and to see some hybrid ancestry in each species, but primarily quillback introgression in brown and copper rockfish. Looking forward to seeing what my data shows!

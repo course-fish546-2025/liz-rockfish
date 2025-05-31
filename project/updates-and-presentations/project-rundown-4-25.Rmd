@@ -1,0 +1,16 @@
+---
+title: "Project Rundown"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Welcome to my FISH 546 project!
+
+As stated in my repo README, I will be looking at rockfish genetics and creating a population structure PCA plot.\
+
+As of April 25th, I am currently working on running my RAD-seq data through the STACKS2 pipeline.\
+
+I'm having issues with my data in the `process_radtags` step in Hyak, so I don't currently have files in raven to show for this, but I will have more things uploaded next week as I am troubleshooting over the weekend!
