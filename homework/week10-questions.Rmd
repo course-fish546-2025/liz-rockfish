@@ -1,0 +1,24 @@
+---
+title: "Week 10 Question Set"
+output: html_document
+date: "2025-06-03"
+---
+
+a.  **Looking back on the quarter what are two things you were not expecting to learn but did, glad you did, and how would you implement this knowledge beyond this class?**\
+    I did not know that I would dip my toes into differential gene expression and epigenetics, so while it wasn't a super deep experience, it was nice to see how those kinds of analyses work! I also appreciated the experience with pro-reproducible science methods for creating reports/organizing data/etc. and that's something I have as a goal, but hadn't taken much action to make sure my work is as reproducible as possible (beyond the normal scope, of course). I will definitely keep that at the forefront of my work from here on out.
+
+b.  **Rank the following from 1-5, with 1 being your best friend and 5 being your enemy (raven, rstudio, knitr, bash, github)**\
+
+> 1.  bash (I actually love shell scripting!!)
+
+> 2.  GitHub (I love organizing things...)
+
+> 3.  RStudio (we were enemies once but I love the versatility and have grown quite fond over the years)
+
+> 4.  Raven (no hard feelings here, works just like any other remote machine!)
+
+> 5.  knitr (I just have so much less patience for debugging visual things rather than functional things, don't know why)
+
+c.  **As part of your research project you must of learned something beyond methods. What is the most important biological finding from your work to to date? Assuming you follow this line of research what is your long term goal of what you expect to learn about biology, ecology, or the environment?**\
+    Haha, I learned that you can get VERY weird unexpected results from your data even after following the exact methodology and pipeline as someone prior to you! Same species and lab protocol and all. I learned a lot more about sequencing and the ways it can go wrong/be skewed or biased given that that may have been what happened with my data (still TBD, having to run a LOT of tests...). One of the biggest things I've taken from my dataset is that we should definitely be including negative controls. Most people I have interacted with do not include them; however, I took my negative controls all the way through sequencing, and they returned enough reads to have to consider contamination in my dataset. If I hadn't included them, I would've been none the wiser that my dataset may be tainted.\
+    As for my future research, my long term goal is to learn more about fine-scale population structure and how that may influence hybridization, both ancient and recent. My species are not the only example of a hybrid complex nor is Puget Sound the only region that has an interesting structure, so it would be interesting to see if the patterns across other species are similar.
