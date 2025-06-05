@@ -15,6 +15,6 @@ For this portion of my project, this consists of:
 
 Week 06 project updates: https://rpubs.com/lizboggs/week06projectupdates-fish546
 
-Compendium link (coming soon):
+**Compendium link:** https://rpubs.com/lizboggs/rockfish-compendium-546 
 
 DOI: [![DOI](https://zenodo.org/badge/958870260.svg)](https://doi.org/10.5281/zenodo.15588397)
