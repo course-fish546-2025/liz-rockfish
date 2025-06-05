@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.552">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Rockfish RAD-seq: Bioinformatics and unexpected data weirdness</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="rockfish-compendium_files/libs/clipboard/clipboard.min.js"></script>
+<script src="rockfish-compendium_files/libs/quarto-html/quarto.js"></script>
+<script src="rockfish-compendium_files/libs/quarto-html/popper.min.js"></script>
+<script src="rockfish-compendium_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="rockfish-compendium_files/libs/quarto-html/anchor.min.js"></script>
+<link href="rockfish-compendium_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="rockfish-compendium_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="rockfish-compendium_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="rockfish-compendium_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="rockfish-compendium_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body>
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#welcome-to-my-fish-546-compendium" id="toc-welcome-to-my-fish-546-compendium" class="nav-link active" data-scroll-target="#welcome-to-my-fish-546-compendium">Welcome to my FISH 546 compendium!</a></li>
+  <li><a href="#disclaimer-my-data-is-in-hyak-klone" id="toc-disclaimer-my-data-is-in-hyak-klone" class="nav-link" data-scroll-target="#disclaimer-my-data-is-in-hyak-klone">Disclaimer: My data is in Hyak (Klone)</a></li>
+  <li><a href="#quality-control" id="toc-quality-control" class="nav-link" data-scroll-target="#quality-control">Quality control</a></li>
+  <li><a href="#demultiplex" id="toc-demultiplex" class="nav-link" data-scroll-target="#demultiplex">Demultiplex</a></li>
+  <li><a href="#remove-pcr-duplicates" id="toc-remove-pcr-duplicates" class="nav-link" data-scroll-target="#remove-pcr-duplicates">Remove PCR Duplicates</a></li>
+  <li><a href="#align-to-reference-geneome" id="toc-align-to-reference-geneome" class="nav-link" data-scroll-target="#align-to-reference-geneome">Align to reference geneome</a></li>
+  <li><a href="#converting-sam-to-bam" id="toc-converting-sam-to-bam" class="nav-link" data-scroll-target="#converting-sam-to-bam">Converting SAM to BAM</a></li>
+  <li><a href="#uh-oh-my-negative-controls" id="toc-uh-oh-my-negative-controls" class="nav-link" data-scroll-target="#uh-oh-my-negative-controls">Uh oh… my negative controls!</a></li>
+  <li><a href="#lets-check-out-the-aligned-data-more" id="toc-lets-check-out-the-aligned-data-more" class="nav-link" data-scroll-target="#lets-check-out-the-aligned-data-more">Let’s check out the aligned data more…</a></li>
+  <li><a href="#weird-read-depth-and-read-counts---thats-two-problems-now" id="toc-weird-read-depth-and-read-counts---thats-two-problems-now" class="nav-link" data-scroll-target="#weird-read-depth-and-read-counts---thats-two-problems-now">Weird read depth and read counts - that’s TWO problems now!</a></li>
+  <li><a href="#where-i-go-from-here" id="toc-where-i-go-from-here" class="nav-link" data-scroll-target="#where-i-go-from-here">Where I go from here</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
+  </ul>
+</nav>
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Rockfish RAD-seq: Bioinformatics and unexpected data weirdness</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="welcome-to-my-fish-546-compendium" class="level2">
+<h2 class="anchored" data-anchor-id="welcome-to-my-fish-546-compendium">Welcome to my FISH 546 compendium!</h2>
+<p>This is a snippet of my MS research, wherein I am taking samples of brown, copper, and quillback rockfishes (<em>Sebastes spp.</em>) from the Salish Sea (Puget Sound and the Georgia Basin) and the Pacific Coast to investigate <strong>population structure and patterns of hybridization</strong> between these species. So, that means what different populations within the species exist (ie., are copper rockfish in Puget Sound genetically different from copper rockfish on the coast?) and if/to what extent these species mate with each other and produce offspring (or, more realistically, did they do this in the past? We can find this out!)</p>
+<p>These three are known to hybridize (Schwenke et al.&nbsp;2018; Buonaccorsi 2002, 2005; Seeb 1998) and recent research contrasts previously seen patterns (Wray et al.&nbsp;2018); my project is designed to address the gaps in previous work to (ideally) tease apart these patterns. Rockfishes are a vital part of Puget Sound and have been closed to fishing within the Sound for quite some time now (since ~2000 for commercial, 2010 for recreational), so getting a clear picture of their population status and hybrid background can help inform management tactics to aid in their recovery.</p>
+<p>Here, I will take raw sequencing data (straight from the sequencing facility!) and process it through a common bioinformatics pipeline to prepare for downstream analysis, as well as investigate the issues that subsequently popped up with my data during this process.</p>
+</section>
+<section id="disclaimer-my-data-is-in-hyak-klone" class="level1">
+<h1>Disclaimer: My data is in Hyak (Klone)</h1>
+<p>In order to avoid many headaches from running and transferring my data between two places (since I need all of my work to live on Hyak anyway), I have done the heavily lifting through job scheduling (slurm) on Hyak and keep my files there as well (final, intermediate, and otherwise). For this class project, I have uploaded the important files to my repo (code, some output files, etc.).</p>
+</section>
+<section id="quality-control" class="level1">
+<h1>Quality control</h1>
+<p>The first step is always to check out the data to see what the quality is, and any weird signals that may be at the forefront already. My data has been sequenced on a NovaSeq 6000 S4 run type and has been sent to me in the form of per-library zipped fastq files - two for each library, denoting the forward and reverse reads, as this is a paired-end sequencing run (150bp).</p>
+<p>Here are screenshots of my MultiQC results:</p>
+<p><img src="rockfish-compendium_files/rockfish_sequence_counts_dupes.png" class="img-fluid"> <img src="rockfish-compendium_files/rockfish_mean_qual_scores.png" class="img-fluid"></p>
+<p>The duplication rate is quite high, but that’s not unexpected for RAD-seq, given the presence of PCR steps in the lab protocol. The quality of my samples looks great overall! Moving on to the next step.</p>
+</section>
+<section id="demultiplex" class="level1">
+<h1>Demultiplex</h1>
+<p>Now we can demultiplex the libraries - this assigns sequences to individuals based on their unique barcode combination - a 6bp library barcode in the header, and a 10bp barcode inline with the sequence.</p>
+<p>For my pipeline, I’m using <em>STACKS</em> v2.61 <code>process_radtags</code>, which will then output my files in fastq format (forward and reverse reads, so files with 1 and 2 in their suffix).</p>
+<p>Here is my script - it runs through each pair of library read files (R1 and R2) for every library separately:</p>
+<pre><code>#!/bin/bash
+#SBATCH --job-name=process_radtags_bylibdemux
+#SBATCH --account=merlab
+#SBATCH --partition=compute-hugemem
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=32
+## Walltime (days-hours:minutes:seconds format)
+#SBATCH --time=5-12:00:00
+## Memory per node
+#SBATCH --mem=500G
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=lizboggs@uw.edu
+
+
+##### ENVIRONMENT SETUP ##########
+## Specify the directory containing data
+RAWDIR=/mmfs1/gscratch/merlab/lizboggs/rawrad_demuxlibs/demux.2025-05-14.maybe_final
+OUTDIR=/mmfs1/gscratch/scrubbed/lizboggs/demultiplexed_by_lib
+BARCODES=/gscratch/merlab/lizboggs/barcodes
+MYCONDA=/gscratch/merlab/software/miniconda3/etc/profile.d/conda.sh
+MYENV=stacks_env
+## Activate the conda environment:
+## start with clean slate
+module purge
+
+## This is the filepath to our conda installation on Klone. Source command will allow us to execute commands from a file in the current shell
+source $MYCONDA
+
+## activate the conda environment
+conda activate $MYENV
+
+#####################PLATE 01: LIB INDEX ATCACG ##############################################################################################
+
+### Separates raw sequencing files into individual IDs based on matching barcodes
+
+process_radtags \
+-1 ${RAWDIR}/ATCACG_S3_L003_R1_001.fastq.gz \
+-2 ${RAWDIR}/ATCACG_S3_L003_R2_001.fastq.gz \
+-o $OUTDIR \
+-b $BARCODES/rflib01_barcodes_withlib.txt \
+--inline_index \
+-i gzfastq \
+-y fastq \
+-E phred33 \
+--bestrad \
+-e sbfI \
+-q \
+--filter_illumina \
+-c \
+-t 130 \
+--adapter_1 AGATCGGAAGAGCACACGTCTGAACTCCAGTCA \
+--adapter_2 AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT \
+-r \
+--barcode_dist_1 1 \
+--barcode_dist_2 1 \
+
+#####################PLATE 02: LIB INDEX CGATGT ##############################################################################################
+
+### Separates raw sequencing files into individual IDs based on matching barcodes
+
+process_radtags \
+-1 ${RAWDIR}/CGATGT_S2_L003_R1_001.fastq.gz \
+-2 ${RAWDIR}/CGATGT_S2_L003_R2_001.fastq.gz \
+-o $OUTDIR \
+-b $BARCODES/rflib02_barcodes_withlib.txt \
+--inline_index \
+-i gzfastq \
+-y fastq \
+-E phred33 \
+--bestrad \
+-e sbfI \
+-q \
+--filter_illumina \
+-c \
+-t 130 \
+--adapter_1 AGATCGGAAGAGCACACGTCTGAACTCCAGTCA \
+--adapter_2 AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT \
+-r \
+--barcode_dist_1 1 \
+--barcode_dist_2 1 \
+
+#####################PLATE 03: LIB INDEX TTAGGC ###############################################################################################
+
+### Separates raw sequencing files into individual IDs based on matching barcodes
+
+process_radtags \
+-1 ${RAWDIR}/TTAGGC_S1_L003_R1_001.fastq.gz \
+-2 ${RAWDIR}/TTAGGC_S1_L003_R2_001.fastq.gz \
+-o $OUTDIR \
+-b $BARCODES/rflib03_barcodes_withlib.txt \
+--inline_index \
+-i gzfastq \
+-y fastq \
+-E phred33 \
+--bestrad \
+-e sbfI \
+-q \
+--filter_illumina \
+-c \
+-t 130 \
+--adapter_1 AGATCGGAAGAGCACACGTCTGAACTCCAGTCA \
+--adapter_2 AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT \
+-r \
+--barcode_dist_1 1 \
+--barcode_dist_2 1 \
+
+##################PLATE 04: LIB INDEX TGACCA ##################################################################################################
+
+### Separates raw sequencing files into individual IDs based on matching barcodes
+
+process_radtags \
+-1 ${RAWDIR}/TGACCA_S4_L003_R1_001.fastq.gz \
+-2 ${RAWDIR}/TGACCA_S4_L003_R2_001.fastq.gz \
+-o $OUTDIR \
+-b $BARCODES/rflib04_barcodes_withlib.txt \
+--inline_index \
+-i gzfastq \
+-y fastq \
+-E phred33 \
+--bestrad \
+-e sbfI \
+-q \
+--filter_illumina \
+-c \
+-t 130 \
+--adapter_1 AGATCGGAAGAGCACACGTCTGAACTCCAGTCA \
+--adapter_2 AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT \
+-r \
+--barcode_dist_1 1 \
+--barcode_dist_2 1 \
+
+####################PLATE 05: LIB INDEX GCCAAT ###############################################################################################
+
+### Separates raw sequencing files into individual IDs based on matching barcodes
+
+process_radtags \
+-1 ${RAWDIR}/GCCAAT_S5_L003_R1_001.fastq.gz \
+-2 ${RAWDIR}/GCCAAT_S5_L003_R2_001.fastq.gz \
+-o $OUTDIR \
+-b $BARCODES/rflib05_barcodes_withlib.txt \
+--inline_index \
+-i gzfastq \
+-y fastq \
+-E phred33 \
+--bestrad \
+-e sbfI \
+-q \
+--filter_illumina \
+-c \
+-t 130 \
+--adapter_1 AGATCGGAAGAGCACACGTCTGAACTCCAGTCA \
+--adapter_2 AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT \
+-r \
+--barcode_dist_1 1 \
+--barcode_dist_2 1 \
+
+## deactivate the conda environment</code></pre>
+<p>Results show that my sequences had an average of ~80% reads retained - fantastic! Here is an example of one of my samples’ log results:</p>
+<pre><code>687916298 total sequences
+167394182 reads were transposed [based on the BestRAD flag] (24.3%)
+        0 failed Illumina filtered reads (0.0%)
+ 50293144 reads contained adapter sequence (7.3%)
+ 54517844 barcode not found drops (7.9%)
+  1393574 low quality read drops (0.2%)
+  2312311 RAD cutsite not found drops (0.3%)
+579399425 retained reads (84.2%)</code></pre>
+<p>Let’s now move on to a cleaning step and then we can align.</p>
+</section>
+<section id="remove-pcr-duplicates" class="level1">
+<h1>Remove PCR Duplicates</h1>
+<p>To clean the data, we first need to remove duplicate reads (“clones”) that result from PCR amplification. For this, I used <em>STACKS</em> <code>clone_filter</code>, the natural next step in the <em>STACKS</em> pipeline.</p>
+<p>Here is the code:</p>
+<pre><code>#!/bin/bash
+#SBATCH --job-name=clone_filter_rockfish3
+#SBATCH --account=merlab
+#SBATCH --partition=compute-hugemem
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=16
+## Walltime (days-hours:minutes:seconds format)
+#SBATCH --time=16:00:00
+## Memory per node
+#SBATCH --mem=300G
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=lizboggs@uw.edu
+
+##### ENVIRONMENT SETUP ##################################
+## Specify the directories containing data
+DATADIR=/mmfs1/gscratch/scrubbed/lizboggs/demultiplexed_by_lib
+OUTDIR=/mmfs1/gscratch/scrubbed/lizboggs/clone_filter3
+MYCONDA=/gscratch/merlab/software/miniconda3/etc/profile.d/conda.sh
+MYENV=stacks_env
+
+## start with clean slate
+module purge
+
+## This is the filepath to our conda installation on Klone. Source command will allow us to execute commands from a file in the current shell
+source $MYCONDA
+
+## activate the conda environment
+conda activate $MYENV
+
+############ Run clone_filter #############################
+cd $DATADIR
+
+IND_ID=$(cat /gscratch/merlab/lizboggs/barcodes/clonefilter_barcodes.txt | cut -f3)
+
+for i in ${IND_ID};
+do
+echo i
+clone_filter \
+-1 $DATADIR/${i}.1.fq \
+-2 $DATADIR/${i}.2.fq \
+-o $OUTDIR \
+&amp;&gt;&gt; $OUTDIR/output.txt
+
+done
+
+mv *.1.1.fq ../clone_filter3
+mv *.2.2.fq ../clone_filter3
+
+for i in ${IND_ID};
+do
+  cat /gscratch/scrubbed/lizboggs/clone_filter3/${i}.1.1.fq &gt; /gscratch/scrubbed/lizboggs/clone_filter3/${i}.1.fq
+  cat /gscratch/scrubbed/lizboggs/clone_filter3/${i}.2.2.fq &gt; /gscratch/scrubbed/lizboggs/clone_filter3/${i}.2.fq
+
+  done
+
+## deactivate the conda environment
+conda deactivate</code></pre>
+<p>A sample result from my run:</p>
+<pre><code>4759578 pairs of reads input. 863047 pairs of reads output, discarded 3896531 pairs of reads, 81.87% clone reads.</code></pre>
+<p>This tracks with the duplication level seen in my FastQC files. What is a bit suspicious is that my negative controls (there are 5 - one for each extraction plate I did in the lab) are also retaining reads in a non-insignificant way… around 20-40%. Let’s put a pin in that.</p>
+</section>
+<section id="align-to-reference-geneome" class="level1">
+<h1>Align to reference geneome</h1>
+<p>Time to align and hope for the best! Here, I am using the honeycomb rockfish genome (<em>Sebastes umbrosus</em>). This is the closest relative to my three rockfish species that has a chromosome-level reference-quality genome; that being said, it also has the benefit of not being a hybridizing species, so it’s a bit more of an even playing field to map to for my somewhat messy species.</p>
+<p>I am using <code>bowtie2</code> to align my data to the genome. Here is the code:</p>
+<pre><code>#!/bin/bash
+#SBATCH --job-name=bowtie2_rockfish
+#SBATCH --account=merlab
+#SBATCH --partition=compute-hugemem
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=32
+## Walltime (days-hours:minutes:seconds format)
+#SBATCH --time=10-12:00:00
+## Memory per node
+#SBATCH --mem=300G
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=lizboggs@uw.edu
+
+##### ENVIRONMENT SETUP ##########
+DATADIR=/mmfs1/gscratch/scrubbed/lizboggs/clone_filter3 # input files that were previously demuxed
+MYLANEID=621.3 # The sequencing id of the lane (you can set this to whatever value you want)
+GENOMEDIR=/mmfs1/gscratch/merlab/lizboggs/genome # The directory containing the reference genome
+GENOME_PREFIX=GCF_015220745.1_fSebUmb1.pri_genomic # prefix of .bt2 files made by bowtie2 (the name of the genome, without the suffixes)
+SUFFIX1=.1.fq # Suffix to the fastq files -  The forward reads with paired-end data.
+SUFFIX2=.2.fq # Suffix to the fastq files - The reverse reads with paired-end data.
+OUTDIR=/mmfs1/gscratch/scrubbed/lizboggs/sam # where to store output files
+
+##############################################################################
+
+export PATH=/mmfs1/gscratch/merlab/software/miniconda3/bin:$PATH
+
+## 1. Index the rockfish genome so bowtie2 can use it
+bowtie2-build -f $GENOMEDIR'/'$GENOME_PREFIX'.fna' $GENOMEDIR'/'$GENOME_PREFIX
+
+## 2. Make directory for output files (commented out if already made prior to running this script)
+#mkdir $OUTDIR
+
+## 3. Move into the directory containing the fastq files
+cd $DATADIR
+
+## 4. Run bowtie over all samples in the sample list
+for MYFILE in $DATADIR'/'*$SUFFIX1
+do
+        echo $MYFILE
+        MYBASE=`basename --suffix=$SUFFIX1 $MYFILE`
+        echo ${MYBASE}
+        bowtie2 -x $GENOMEDIR'/'$GENOME_PREFIX\
+        --phred33 -q \
+        -1 ${MYBASE}$SUFFIX1 \
+        -2 ${MYBASE}$SUFFIX2 \
+        -S ${MYBASE}.sam \
+        --very-sensitive \
+        --minins 0 --maxins 1500 --fr \
+        --threads ${SLURM_JOB_CPUS_PER_NODE} \
+        --rg-id ${MYBASE} --rg SM:${MYBASE} --rg LB:${MYBASE} --rg PU:${MYLANEID} --rg PL:ILLUMINA
+done
+
+# Move all of the sam files to the output directory
+mv *'.sam' $OUTDIR</code></pre>
+<p>And here is an example of a mapped individual’s output:</p>
+<pre><code>/mmfs1/gscratch/scrubbed/lizboggs/clone_filter3/QB50152B.1.fq
+QB50152B
+191457 reads; of these:
+  191457 (100.00%) were paired; of these:
+    21521 (11.24%) aligned concordantly 0 times
+    145545 (76.02%) aligned concordantly exactly 1 time
+    24391 (12.74%) aligned concordantly &gt;1 times
+    ----
+    21521 pairs aligned concordantly 0 times; of these:
+      782 (3.63%) aligned discordantly 1 time
+    ----
+    20739 pairs aligned 0 times concordantly or discordantly; of these:
+      41478 mates make up the pairs; of these:
+        25936 (62.53%) aligned 0 times
+        11126 (26.82%) aligned exactly 1 time
+        4416 (10.65%) aligned &gt;1 times
+93.23% overall alignment rate</code></pre>
+<p>Cool! Looks like it worked! A rate of 75% for aligning concordantly exactly 1 time and overall alignment averaging around 90% is excellent. Let’s get these files in a workable format.</p>
+</section>
+<section id="converting-sam-to-bam" class="level1">
+<h1>Converting SAM to BAM</h1>
+<p>Before I can do any analyses, I need to transform these files into smaller, more easily processed files. We do this with BAM - binary alignment/map files. Computer-readable, not at all human readable. Practically wingdings if you try to print one out. Anyway! For this, I used <code>samtools</code>. This will also produce sorted BAM files, which are indexed BAM files according to their place in the chromosomes/scaffolds.</p>
+<p>Here is the script:</p>
+<pre><code>#!/bin/bash
+#SBATCH --job-name=samtools_rockfish
+#SBATCH --account=merlab
+#SBATCH --partition=compute-hugemem
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=32
+## Walltime (days-hours:minutes:seconds format)
+#SBATCH --time=4-12:00:00
+## Memory per node
+#SBATCH --mem=300G
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=lizboggs@uw.edu
+
+
+##### ENVIRONMENT SETUP #####################
+cd /mmfs1/gscratch/scrubbed/lizboggs
+mkdir -p bam
+
+## Specify the directory containing data
+DATADIR=/mmfs1/gscratch/scrubbed/lizboggs/allsam # directory with ALL of my sam files, both fresh from clone_filter and those that had to be fixed post-clone_filter
+SUFFIX1=.sam # file suffix
+OUTDIR=/mmfs1/gscratch/scrubbed/lizboggs/bam # where to store output files
+MYCONDA=/mmfs1/gscratch/merlab/software/miniconda3/etc/profile.d/conda.sh # path to conda installation on our Klone node - do NOT change this
+MYENV=samtools_env # name of the conda environment containing samtools software
+THREADS=$SLURM_CPUS_PER_TASK
+
+## Start with clean slate
+module purge
+
+## Source command will allow us to execute commands from a file in the current shell
+source $MYCONDA
+
+## Activate the conda environment
+conda activate $MYENV
+
+###################################################################################################################
+## Move into the working directory and run script
+cd $DATADIR
+
+## Run samtools commands. This takes about 5 min per sample (anticipating ~32 hour runtime for this run, as I have 389 samples)
+for MYSAMPLEFILE in *$SUFFIX1
+do
+    echo $MYSAMPLEFILE
+    MYBASE=`basename --suffix=$SUFFIX1 $MYSAMPLEFILE`
+    samtools view -@ $THREADS -bS -F 4 $MYBASE'.sam' &gt; $MYBASE'.bam'
+    samtools view -@ $THREADS -h -q 20 $MYBASE'.bam' | samtools view -@ $THREADS -buS - | samtools sort -@ $THREADS -o $MYBASE'_minq20_sorted.bam'
+    samtools index $MYBASE'_minq20_sorted.bam'
+done
+
+## Flag explanations for samtools view:
+## -b       output BAM
+## -h       include header in SAM output
+## -q INT   only include reads with mapping quality &gt;= INT [0]
+## -F INT   only include reads with none of the bits set in INT set in FLAG [0] (aka when this is set to 4, you remove unmapped reads)
+
+# Move all of the bam files to the output directory
+mv *'.bam' $OUTDIR
+mv *'.bai' $OUTDIR
+
+## Deactivate the conda environment
+conda deactivate</code></pre>
+<p>I can now grab some stats on my alignments! Let’s check out a chunk of individuals’ total reads:</p>
+<pre><code>CO50111B_minq20_sorted.bam      1037657
+CO50111_minq20_sorted.bam       808879
+CO50112B_minq20_sorted.bam      290383
+CO50112_minq20_sorted.bam       396416
+CO50113B_minq20_sorted.bam      783780
+CO50113_minq20_sorted.bam       1233396
+NEGCONT01_minq20_sorted.bam     152204
+NEGCONT02_minq20_sorted.bam     195029
+NEGCONT03_minq20_sorted.bam     116627
+NEGCONT04B_minq20_sorted.bam    113128
+NEGCONT04_minq20_sorted.bam     96766
+QB50001_minq20_sorted.bam       2591497
+QB50003_minq20_sorted.bam       50538
+QB50004_minq20_sorted.bam       699732
+QB50005_minq20_sorted.bam       1525392
+QB50006_minq20_sorted.bam       646550
+QB50007_minq20_sorted.bam       199123
+QB50008_minq20_sorted.bam       49282
+QB50010_minq20_sorted.bam       1052125</code></pre>
+<p>While the actual fish samples look fairly normal in read count, albeit a bit low, those negative controls are looking too high - #%<span class="citation" data-cites="*">@*</span>!!! Ideally, you want to see practically NO reads for negative controls, ie. only 0-100 reads per control maximum. 100,000 is a lot higher than that, obviously!</p>
+</section>
+<section id="uh-oh-my-negative-controls" class="level1">
+<h1>Uh oh… my negative controls!</h1>
+<p>Given how meticulously careful I was in the lab, I certainly wasn’t expecting to see that my negative controls - extraction plate wells with NO DNA put into them - returned reads in some slightly scary numbers! This pretty much halted my plan and warrants further investigating.</p>
+</section>
+<section id="lets-check-out-the-aligned-data-more" class="level1">
+<h1>Let’s check out the aligned data more…</h1>
+<p>I plotted the total read counts (how many total reads per individual) and mean depths of reads (the mean of how many times a base was sequenced, plotted per individual as well), along with their mean and median.</p>
+<p><img src="rockfish-compendium_files/readcounts_persample_sortedbam.png" class="img-fluid"> <img src="rockfish-compendium_files/meanreaddepth_persample.png" class="img-fluid"></p>
+<p>Since those crazy outliers are dragging the values up a bit and making it hard to see the majority of the results, here are some adjusted plots - I removed individuals over 20M reads for the read counts, and reads with a depth of over 60 were removed for the depth plot.</p>
+<p><img src="rockfish-compendium_files/readcounts_bam_noinds20M.png" class="img-fluid"> <img src="rockfish-compendium_files/meandepth_noindsabove60.png" class="img-fluid"></p>
+</section>
+<section id="weird-read-depth-and-read-counts---thats-two-problems-now" class="level1">
+<h1>Weird read depth and read counts - that’s TWO problems now!</h1>
+<p>Even though I treated my data primarily as “plug and play” with script skeletons borrowed from labmates, my data has behaved intensely different from theirs. Something has clearly gone awry and I now need to chase down where it happened and try to see <em>why.</em></p>
+</section>
+<section id="where-i-go-from-here" class="level1">
+<h1>Where I go from here</h1>
+<p><strong>LOTS</strong> to do now! There’s a hodgepodge of things I am running to investigate these issues further - BLASTing my negative controls to see what they align to, checking out the length of my RADtags to see if they even make sense (so far, they don’t), and running the next step in the pipeline on my data anyway to see where the negative controls cluster in a PCA with actual samples of my rockfish.</p>
+<p>While this isn’t the fun, exciting result I had hoped for, it does bring up very important points: 1) don’t trust your data - hey, where have I heard that before? - and 2) negative controls may be worth your time. If this is not a weird bug somewhere in my pipeline causing my negative controls to be assigned reads they shouldn’t have, then I do have contamination on my hands and that is <em>VERY</em> important to know when it comes to drawing conclusions from a dataset.</p>
+<p>Onward I go to the 1,000 things I need to check and rerun! But hey, that’s science!!</p>
+</section>
+<section id="references" class="level1">
+<h1>References</h1>
+<p>Buonaccorsi, Vincent P., Carol A. Kimbrell, Eric A. Lynn, and Russell D. Vetter. “Limited Realized Dispersal and Introgressive Hybridization Influence Genetic Structure and Conservation Strategies for Brown Rockfish, Sebastes Auriculatus.” Conservation Genetics 6, no. 5 (September 2005): 697–713. https://doi.org/10.1007/s10592-005-9029-1.</p>
+<p>Schwenke, Piper L., Linda K. Park, and Lorenz Hauser. “Introgression among Three Rockfish Species (Sebastes Spp.) in the Salish Sea, Northeast Pacific Ocean.” Edited by Tzen-Yuh Chiang. PLOS ONE 13, no. 3 (March 22, 2018): e0194068. https://doi.org/10.1371/journal.pone.0194068.</p>
+<p>Seeb, LW. “Gene Flow and Introgression within and among Three Species of Rockfishes, Sebastes Auriculatus, S. Caurinus, and S. Maliger.” Journal of Heredity 89, no. 5 (September 1, 1998): 393–403. https://doi.org/10.1093/jhered/89.5.393.</p>
+<p>Wray, Anita, Eleni Petrou, Krista M. Nichols, Robert Pacunski, Larry LeClair, Kelly S. Andrews, Marty Kardos, and Lorenz Hauser. “Contrasting Effect of Hybridization on Genetic Differentiation in Three Rockfish Species with Similar Life History.” Evolutionary Applications 17, no. 7 (2024): e13749. https://doi.org/10.1111/eva.13749.</p>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
