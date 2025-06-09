@@ -11,7 +11,7 @@ For this portion of my project, this consists of:
   3. Aligning to a genome with `bowtie2` - in this case, the honeycomb rockfish (closest relative to my three species)
   4. Convert .sam files (output from `bowtie2`) to .bam and .sorted.bam files
   5. Check total read counts per individual and mean read depth per individual using `samtools` and plot histograms using `ggplot2` in R
-  7. Check read counts and depth of reads on 5 negative controls (negative controls from extraction plates - 1 per 96-well plate, nothing added except protocol reagents)
+  7. Check read counts and depth of reads for all 384 samples and 5 negative controls (negative controls from extraction plates - 1 per 96-well plate, nothing added except protocol reagents)
 
 Week 06 project updates: https://rpubs.com/lizboggs/week06projectupdates-fish546
 
